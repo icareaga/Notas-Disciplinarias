@@ -1,0 +1,45 @@
+<div class="card">
+  <h2>3. Establecer Plan de Acción</h2>
+
+  <form [formGroup]="planForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Metas claras*</label>
+      <textarea formControlName="metas" rows="3" placeholder="Definir metas específicas y alcanzables..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Herramientas necesarias</label>
+      <input type="text" formControlName="herramientas" placeholder="Herramientas, materiales, recursos...">
+    </div>
+
+    <div class="form-group">
+      <label>Sesión de capacitación*</label>
+      <input type="text" formControlName="capacitacion" placeholder="Interna, externa, área responsable...">
+    </div>
+
+    <div class="form-group">
+      <label>Documentación de capacitación</label>
+      <textarea formControlName="documentacion" rows="3" placeholder="Lista de asistencia, certificados..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-guardar">Guardar</button>
+  </form>
+
+  <!-- Botones de flujo -->
+  <div class="acciones">
+    <button class="btn-continuar" (click)="continuarProceso()">Continuar Proceso</button>
+    <button class="btn-terminar" (click)="terminarProceso()">Terminar Proceso</button>
+  </div>
+</div>
+
+<!-- Card de cierre -->
+<div class="card" *ngIf="mostrarTerminarProceso">
+  <h3>Justificación de Cierre</h3>
+  <form (ngSubmit)="enviarCierre()">
+    <div class="form-group">
+      <label>Motivo de finalización*</label>
+      <textarea rows="3" placeholder="Explique por qué se cierra el proceso..."></textarea>
+    </div>
+    <button type="submit" class="btn-guardar">Enviar Justificación</button>
+  </form>
+</div>

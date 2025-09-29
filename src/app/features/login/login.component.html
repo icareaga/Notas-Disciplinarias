@@ -1,0 +1,16 @@
+<div class="login-background">
+  <div class="login-card">
+    <h1>Notas Disciplinarias</h1>
+    <h3>Sistema de Notas de Incumplimiento</h3>
+    <p>Bienvenido</p>
+    <h3>Ingresa a tu plataforma</h3>
+
+    <form (ngSubmit)="login()">
+      <input type="text" [(ngModel)]="username" name="username" placeholder="Usuario" required>
+      <input type="password" [(ngModel)]="password" name="password" placeholder="Contraseña" required>
+      <button type="submit">Ingresar</button>
+    </form>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </div>
+</div>

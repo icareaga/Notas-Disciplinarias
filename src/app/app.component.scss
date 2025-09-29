@@ -1,0 +1,30 @@
+ $megacable-blue: #0046AD;
+$megacable-accent: #009FE3;
+$light-bg: #f4f6f9; 
+
+.header {
+  background: $megacable-blue;
+  color: white;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.logo {
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.content {
+  padding: 24px;
+  background: $light-bg;
+  min-height: calc(100vh - 120px); // Altura menos header y footer
+}
+
+.footer {
+  background: $megacable-accent;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+}

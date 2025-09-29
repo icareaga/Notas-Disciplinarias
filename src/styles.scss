@@ -1,1 +1,46 @@
-/* You can add global styles to this file, and also import other style files */
+/* 🎨 Colores corporativos */
+$megacable-blue: #0046AD;   // Azul corporativo
+$megacable-light: #f4f6f9;  // Gris claro
+$megacable-dark: #222;      // Texto oscuro
+$megacable-accent: #009FE3; // Azul secundario
+
+/* 🌐 Estilos globales */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', Arial, sans-serif;
+  color: $megacable-dark;
+  height: 100%;
+}
+
+/* Títulos */
+h1, h2, h3, h4, h5 {
+  color: $megacable-blue;
+  font-weight: bold;
+}
+
+/* Botón corporativo */
+button {
+  background-color: $megacable-blue;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+
+  &:hover {
+    background-color: darken($megacable-blue, 10%);
+  }
+}
+
+/* Cards */
+.card {
+  background: rgb(236, 234, 234);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}

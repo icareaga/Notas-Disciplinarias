@@ -1,0 +1,40 @@
+<div class="card">
+  <h2>2. Determinar la Causa</h2>
+
+  <form [formGroup]="causaForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Causas Identificadas*</label>
+      <textarea formControlName="causasIdentificadas" rows="3" placeholder="Describe las causas..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Evidencia</label>
+      <input type="text" formControlName="evidencia" placeholder="Archivos, referencias, observaciones...">
+    </div>
+
+    <div class="form-group">
+      <label>Comentarios adicionales</label>
+      <textarea formControlName="comentarios" rows="3" placeholder="Notas opcionales..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-guardar">Guardar</button>
+  </form>
+
+  <!-- Botones de flujo -->
+  <div class="acciones">
+    <button class="btn-continuar" (click)="continuarProceso()">Continuar Proceso</button>
+    <button class="btn-terminar" (click)="terminarProceso()">Terminar Proceso</button>
+  </div>
+</div>
+
+<!-- Card de cierre de proceso -->
+<div class="card" *ngIf="mostrarTerminarProceso">
+  <h3>Justificación de Cierre</h3>
+  <form (ngSubmit)="enviarCierre()">
+    <div class="form-group">
+      <label>Motivo de finalización del proceso*</label>
+      <textarea rows="3" placeholder="Explique por qué se cierra el proceso..."></textarea>
+    </div>
+    <button type="submit" class="btn-guardar">Enviar Justificación</button>
+  </form>
+</div>

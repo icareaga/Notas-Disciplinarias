@@ -1,0 +1,82 @@
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  max-width: 700px;
+}
+
+h2 {
+  color: #0046ad; // Azul corporativo Megacable
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+
+    &:focus {
+      border-color: #0046ad;
+      box-shadow: 0 0 4px rgba(0, 70, 173, 0.5);
+    }
+  }
+}
+
+button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &.btn-guardar {
+    background: #0046ad;
+    color: white;
+
+    &:hover {
+      background: #003a8c;
+    }
+  }
+
+  &.btn-continuar {
+    background: #008000;
+    color: white;
+    margin-right: 10px;
+
+    &:hover {
+      background: #006400;
+    }
+  }
+
+  &.btn-terminar {
+    background: #c62828;
+    color: white;
+
+    &:hover {
+      background: #a00000;
+    }
+  }
+}
+
+.acciones {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
