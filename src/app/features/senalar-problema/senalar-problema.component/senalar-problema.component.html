@@ -1,45 +1,31 @@
 <div class="card">
   <h2>1. Señalar el Problema</h2>
 
-  <form [formGroup]="problemaForm" (ngSubmit)="onSubmit()">
+  <!-- Colaborador -->
+  <label>Colaborador*</label>
+  <select [(ngModel)]="nuevoCaso.idUsuarioAfectado">
+    <option value="0">Seleccione un colaborador</option>
+    <option *ngFor="let e of empleados" [value]="e.id_usuario">
+      {{ e.Nombre_Completo }}
+    </option>
+  </select>
 
-    <!-- Colaborador -->
-    <div class="form-group">
-      <label for="colaborador">Colaborador*</label>
-      <input id="colaborador" type="text" formControlName="colaborador" placeholder="Nombre del colaborador" />
-    </div>
+  <!-- Categoría -->
+  <label>Categoría*</label>
+  <select [(ngModel)]="nuevoCaso.idCategoria">
+    <option value="0">Seleccione una categoría</option>
+    <option *ngFor="let c of categorias; let i = index" [value]="i + 1">
+      {{ c }}
+    </option>
+  </select>
 
-    <!-- KPI -->
-    <div class="form-group">
-      <label for="kpi">KPI afectados</label>
-      <input id="kpi" type="text" formControlName="kpi" placeholder="Ejemplo: Ventas, Asistencia" />
-    </div>
+  <!-- Descripción -->
+  <label>Descripción del problema*</label>
+  <textarea
+    rows="4"
+    [(ngModel)]="nuevoCaso.descripcion"
+    placeholder="Describe la situación detectada"
+  ></textarea>
 
-    <!-- Descripción -->
-    <div class="form-group">
-      <label for="descripcion">Descripción del problema*</label>
-      <textarea id="descripcion" rows="3" formControlName="descripcion"></textarea>
-    </div>
-
-    <!-- Fecha -->
-    <div class="form-group">
-      <label for="fecha">Fecha de detección*</label>
-      <input id="fecha" type="date" formControlName="fecha" />
-    </div>
-
-    <!-- Impacto -->
-    <div class="form-group">
-      <label for="impacto">Impacto en la empresa</label>
-      <textarea id="impacto" rows="2" formControlName="impacto"></textarea>
-    </div>
-
-    <!-- Conducta -->
-    <div class="form-group">
-      <label for="conducta">Conducta observada</label>
-      <textarea id="conducta" rows="2" formControlName="conducta"></textarea>
-    </div>
-
-    <!-- Botón -->
-    <button type="submit" class="btn">Guardar</button>
-  </form>
+  <button (click)="crearCaso()">Guardar</button>
 </div>

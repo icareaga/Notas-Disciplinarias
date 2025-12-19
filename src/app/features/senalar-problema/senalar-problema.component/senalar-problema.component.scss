@@ -1,69 +1,44 @@
-/* 🎨 Paleta corporativa Megacable */
-$megacable-blue: #0046AD;   // Azul corporativo
-$megacable-accent: #009FE3; // Azul secundario
-$megacable-light: #f4f6f9;  // Fondo claro
-$megacable-dark: #222;      // Texto oscuro
+$megacable-blue: #0047bb;
 
-/* Card contenedor */
 .card {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  max-width: 600px;
+  margin: 40px auto;
   padding: 24px;
-  margin: 20px auto;
-  max-width: 700px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
-h2 {
-  color: $megacable-blue;
-  margin-bottom: 20px;
-  font-size: 20px;
-}
-
-/* Inputs */
-.form-group {
-  margin-bottom: 18px;
+  h2 {
+    color: $megacable-blue;
+    margin-bottom: 20px;
+  }
 
   label {
     display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-    color: $megacable-dark;
+    margin-top: 16px;
+    font-weight: 600;
   }
 
-  input, textarea {
+  select,
+  textarea {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #bbb;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border-color 0.2s;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
 
-    &:focus {
-      border-color: $megacable-blue;
-      outline: none;
+  button {
+    margin-top: 24px;
+    padding: 10px 16px;
+    background-color: $megacable-blue;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #003a9c;
     }
-  }
-}
-
-/* Botón */
-button {
-  background-color: $megacable-blue;
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 20px;
-  cursor: pointer;
-  transition: background 0.3s;
-
-  &:hover {
-    background-color: darken($megacable-blue, 10%);
-  }
-
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
   }
 }

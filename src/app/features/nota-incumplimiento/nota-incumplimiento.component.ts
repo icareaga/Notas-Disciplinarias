@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-nota-incumplimiento',
@@ -11,10 +10,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./nota-incumplimiento.component.scss']
 })
 export class NotaIncumplimientoComponent {
+
   notaForm: FormGroup;
   mostrarTerminarProceso = false;
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(private fb: FormBuilder) {
     this.notaForm = this.fb.group({
       comportamiento: ['', Validators.required],
       observaciones: ['', Validators.required]
@@ -22,14 +22,11 @@ export class NotaIncumplimientoComponent {
   }
 
   onSubmit() {
-    if (this.notaForm.valid) {
-      console.log('Nota de incumplimiento registrada:', this.notaForm.value);
-      alert('⚠️ Nota de incumplimiento registrada correctamente');
-    }
+    console.log("Formulario enviado:", this.notaForm.value);
   }
 
   continuarProceso() {
-    this.router.navigate(['/acta-administrativa']); // Paso 6 (último)
+    console.log("Continuar proceso");
   }
 
   terminarProceso() {
@@ -37,6 +34,6 @@ export class NotaIncumplimientoComponent {
   }
 
   enviarCierre() {
-    alert('❌ Proceso finalizado en la etapa de Nota de Incumplimiento');
+    console.log("Cierre enviado");
   }
 }

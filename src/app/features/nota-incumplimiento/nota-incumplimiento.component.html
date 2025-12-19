@@ -1,0 +1,73 @@
+<div class="nota-wrapper">
+  <!-- Card principal -->
+  <div class="card">
+    <h2>5. Nota de Incumplimiento</h2>
+
+    <p><strong>¿Qué es?</strong></p>
+    <p>
+      Es una amonestación escrita digitalmente, que se emite cuando el colaborador no corrige el problema,
+      a pesar de las acciones anteriores.
+    </p>
+
+    <p><strong>¿Cómo hacerlo?</strong></p>
+    <ul>
+      <li>Mandar un correo que describa el comportamiento reincidente.</li>
+      <li>Indicar que ya hubo capacitación, seguimiento y retroalimentación.</li>
+    </ul>
+
+    <!-- Formulario reactivo -->
+    <form [formGroup]="notaForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-group">
+        <label>Nombre del colaborador*</label>
+        <input
+          type="text"
+          placeholder="Ejemplo: Juan Pérez"
+          formControlName="comportamiento"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Descripción del incumplimiento*</label>
+        <textarea
+          rows="3"
+          placeholder="Escribe el detalle..."
+          formControlName="observaciones"
+        ></textarea>
+      </div>
+
+      <!-- Fila de botones, igual que en Evaluar Resultados -->
+      <div class="acciones">
+        <!-- Izquierda: Guardar -->
+        <button type="submit" class="btn-guardar">
+          Guardar
+        </button>
+
+        <!-- Derecha: Continuar / Terminar -->
+        <div class="acciones-derecha">
+          <button type="button" class="btn-continuar" (click)="continuarProceso()">
+            Continuar Proceso
+          </button>
+
+          <button type="button" class="btn-terminar" (click)="terminarProceso()">
+            Terminar Proceso
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Card de cierre, mismo ancho y centrado -->
+  <div class="card" *ngIf="mostrarTerminarProceso">
+    <h3>Justificación de Cierre</h3>
+
+    <form (ngSubmit)="enviarCierre()">
+      <div class="form-group">
+        <label>Motivo de finalización*</label>
+        <textarea rows="3" placeholder="Explique por qué se cierra el proceso..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-guardar">Enviar Justificación</button>
+    </form>
+  </div>
+</div>

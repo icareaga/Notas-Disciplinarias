@@ -1,0 +1,113 @@
+/* Wrapper general para centrar como en la vista 4 */
+.nota-wrapper {
+  max-width: 900px;
+  margin: 20px auto;
+}
+
+/* Card genérico (mismo estilo que Evaluar Resultados) */
+.card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-bottom: 25px;
+}
+
+h2 {
+  color: #003b8e;
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+h3 {
+  color: #003b8e;
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+p, li, label {
+  font-size: 16px;
+  color: #333;
+}
+
+ul {
+  margin-bottom: 20px;
+}
+
+/* Formulario */
+.form-group {
+  margin-bottom: 20px;
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #c9c9c9;
+    font-size: 15px;
+    transition: border 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #003b8e;
+      box-shadow: 0 0 5px rgba(0,59,142,0.3);
+    }
+  }
+}
+
+/* Fila de botones igual que vista 4 */
+.acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.acciones-derecha {
+  display: flex;
+  gap: 10px;
+}
+
+/* Botón azul de Guardar / Enviar justificación */
+.btn-guardar {
+  background-color: #003b8e;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #002f6b;
+  }
+}
+
+/* Botones verde / rojo */
+.btn-continuar {
+  background-color: #0a7d00;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #086b00;
+  }
+}
+
+.btn-terminar {
+  background-color: #c62828;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #a61f1f;
+  }
+}

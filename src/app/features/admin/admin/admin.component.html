@@ -1,0 +1,27 @@
+<div class="card">
+  <h2>Administrador</h2>
+
+  <label>Colaborador</label>
+  <input type="number" [(ngModel)]="nuevoCaso.idUsuarioAfectado" />
+
+  <label>Categoría</label>
+  <input type="number" [(ngModel)]="nuevoCaso.idCategoria" />
+
+  <label>Descripción</label>
+  <textarea [(ngModel)]="nuevoCaso.descripcion"></textarea>
+
+  <button (click)="crearCaso()">Crear Caso</button>
+</div>
+
+<hr />
+
+<!--<input
+  placeholder="Filtrar por descripción"
+  (input)="filtrar($any($event.target).value)"
+/-->
+
+<ul>
+  <li *ngFor="let c of casos">
+    {{ c.descripcion }}
+  </li>
+</ul>

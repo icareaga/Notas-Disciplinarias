@@ -1,0 +1,66 @@
+.usuario-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 6px;
+  color: white;
+
+  &.En\ proceso {
+    background: #007bff;
+  }
+
+  &.Completado {
+    background: #28a745;
+  }
+
+  &.Detenido {
+    background: #dc3545;
+  }
+}
+
+.pasos-lista {
+  list-style: none;
+  padding: 0;
+
+  li {
+    background: #eee;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+
+    &.activo {
+      background: #005BBB;
+      color: white;
+      font-weight: bold;
+      border-left: 5px solid #003F8A;
+    }
+  }
+}
+
+.btn-detalle {
+  width: 100%;
+  padding: 12px;
+  background: #005BBB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.btn-detalle:hover {
+  background: #004499;
+}

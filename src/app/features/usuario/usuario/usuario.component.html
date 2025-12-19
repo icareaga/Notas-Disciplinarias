@@ -1,0 +1,29 @@
+<div class="usuario-container">
+
+  <h2>📄 Detalles de tu Caso Disciplinario</h2>
+
+  <div class="card">
+    <p><strong>ID del Caso:</strong> {{ caso.id }}</p>
+    <p><strong>Motivo:</strong> {{ caso.motivo }}</p>
+    <p><strong>Descripción:</strong> {{ caso.descripcion }}</p>
+    <p><strong>Fecha de Creación:</strong> {{ caso.fechaCreacion }}</p>
+
+    <p>
+      <strong>Estado:</strong>
+      <span class="badge" [ngClass]="caso.estado">
+        {{ caso.estado }}
+      </span>
+    </p>
+  </div>
+
+  <h3>📌 Avance del Proceso</h3>
+
+  <ul class="pasos-lista">
+    <li *ngFor="let paso of pasos" [ngClass]="{activo: esPasoActual(paso)}">
+      {{ paso }}
+    </li>
+  </ul>
+
+  <button class="btn-detalle">Ver Detalle Completo</button>
+
+</div>

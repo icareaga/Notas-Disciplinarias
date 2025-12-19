@@ -1,0 +1,87 @@
+.admin-container {
+  padding: 20px;
+}
+
+.titulo {
+  font-size: 26px;
+  font-weight: bold;
+  color: #0a47a1;
+  margin-bottom: 15px;
+}
+
+.header-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.btn-excel {
+  background: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+}
+
+.filtro {
+  background: #5d77bea4;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.filtro.activo {
+  background: #0d6efd;
+  color: white;
+}
+
+.badge {
+  background: #fff;
+  color: #0d6efd;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 6px;
+  font-size: 12px;
+}
+
+.buscador {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th {
+  background: #0056b3;
+  color: white;
+  padding: 10px;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.btn-pdf {
+  background: #dc3545;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+}
