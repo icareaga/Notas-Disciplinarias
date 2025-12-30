@@ -40,6 +40,34 @@ export class UsuarioComponent {
     estado: 'En proceso'
   };
 
+  // 🔹 Historial de casos anteriores
+  historialCasos: CasoUsuario[] = [
+    {
+      id: 987,
+      motivo: 'Falta de puntualidad',
+      descripcion: 'Tres llegadas tarde en una semana.',
+      pasoActual: 'Completado',
+      fechaCreacion: '2024-11-15',
+      estado: 'Completado'
+    },
+    {
+      id: 654,
+      motivo: 'Uso inadecuado de recursos',
+      descripcion: 'Uso personal del equipo de trabajo.',
+      pasoActual: 'Completado',
+      fechaCreacion: '2024-08-20',
+      estado: 'Completado'
+    },
+    {
+      id: 321,
+      motivo: 'Incumplimiento de políticas',
+      descripcion: 'Violación de código de conducta.',
+      pasoActual: 'Detenido',
+      fechaCreacion: '2024-05-10',
+      estado: 'Detenido'
+    }
+  ];
+
   // Validar si un paso es el actual
   esPasoActual(paso: string): boolean {
     return paso === this.caso.pasoActual;

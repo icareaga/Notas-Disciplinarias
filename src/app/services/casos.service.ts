@@ -19,4 +19,10 @@ export class CasosService {
   obtenerCasos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/admin/casos-activos/368048`);
   }
+
+  
+descargarPDF(id: number) {
+  return this.http.get(`/api/casos/${id}/pdf`, { responseType: 'blob' });
+}
+
 }

@@ -1,27 +1,122 @@
-<div class="card">
-  <h2>Administrador</h2>
 
-  <label>Colaborador</label>
-  <input type="number" [(ngModel)]="nuevoCaso.idUsuarioAfectado" />
+<div class="admin-container">
 
-  <label>Categoría</label>
-  <input type="number" [(ngModel)]="nuevoCaso.idCategoria" />
+  <!-- Título -->
+  <h2 class="titulo">
+    <span class="emoji" aria-hidden="true">📋</span>
+    Casos disciplinarios de tu área
+  </h2>
 
-  <label>Descripción</label>
-  <textarea [(ngModel)]="nuevoCaso.descripcion"></textarea>
+  <!-- Barra de acciones: Exportar + Filtros -->
+  <div class="header-toolbar">
+    <button class="btn-excel" (click)="exportarExcel()">
+    Exportar Excel
+    </button>
 
-  <button (click)="crearCaso()">Crear Caso</button>
+    <div class="filtros">
+      <button
+        class="filtro"
+        [class.activo]="filtroEstado === 'TODOS'"
+        (click)="setFiltro('TODOS')"
+      >
+        Todos <span class="badge">{{ conteos.todos }}</span>
+      </button>
+
+      <button
+        class="filtro"
+        [class.activo]="filtroEstado === 'SENALAR_PROBLEMA'"
+        (click)="setFiltro('SENALAR_PROBLEMA')"
+      >
+        Señalar Problema <span class="badge">{{ conteos.senalarProblema }}</span>
+      </button>
+
+      <button
+        class="filtro"
+        [class.activo]="filtroEstado === 'DETERMINAR_CAUSA'"
+        (click)="setFiltro('DETERMINAR_CAUSA')"
+      >
+        Determinar Causa <span class="badge">{{ conteos.determinarCausa }}</span>
+      </button>
+
+      <button
+        class="filtro"
+        [class.activo]="filtroEstado === 'PLAN_ACCION'"
+        (click)="setFiltro('PLAN_ACCION')"
+      >
+        Plan de Acción <span class="badge">{{ conteos.planAccion }}</span>
+      </button>
+
+      <button
+        class="filtro"
+        [class.activo]="filtroEstado === 'EVALUAR_RESULTADOS'"
+        (click)="setFiltro('EVALUAR_RESULTADOS')"
+      >
+        Evaluar Resultados <span class="badge">{{ conteos.evaluarResultados }}</span>
+      </button>
+
+      <button
+        class="filtro"
+        [class.activo]="filtroEstado === 'NOTA_INCUMPLIMIENTO'"
+        (click)="setFiltro('NOTA_INCUMPLIMIENTO')"
+      >
+        Nota Incumplimiento <span class="badge">{{ conteos.notaIncumplimiento }}</span>
+      </button>
+
+      <button
+        class="filtro"
+        [class.activo]="filtroEstado === 'ACTA_ADMINISTRATIVA'"
+        (click)="setFiltro('ACTA_ADMINISTRATIVA')"
+      >
+        Acta Administrativa <span class="badge">{{ conteos.actaAdministrativa }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <input
+    class="buscador"
+    type="text"
+    placeholder="Buscar por nombre del empleado..."
+    [(ngModel)]="textoBusqueda"
+    (input)="aplicarFiltros()"
+  />
+
+  <!-- Tabla -->
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Empleado</th>
+        <th>Motivo</th>
+        <th>Levantado Por</th>
+        <th>Paso Actual</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let c of casosFiltrados">
+        <td>{{ c.id }}</td>
+        <td>{{ c.empleado }}</td>
+        <td>{{ c.motivo }}</td>
+        <td>{{ c.levantadoPor }}</td>
+        <td>{{ c.pasoActual }}</td>
+        <td>{{ c.estadoEtiqueta }}</td>
+        <td>{{ c.fecha | date:'yyyy-MM-dd' }}</td>
+        <td>
+          <button class="btn-pdf" (click)="descargarPDF(c)">
+            📄 PDF
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="casosFiltrados.length === 0">
+        <td colspan="8" style="text-align:center; color:#666;">
+          No hay registros que coincidan con el filtro.
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
-
-<hr />
-
-<!--<input
-  placeholder="Filtrar por descripción"
-  (input)="filtrar($any($event.target).value)"
-/-->
-
-<ul>
-  <li *ngFor="let c of casos">
-    {{ c.descripcion }}
-  </li>
-</ul>

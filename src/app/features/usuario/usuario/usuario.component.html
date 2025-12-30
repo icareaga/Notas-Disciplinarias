@@ -1,6 +1,6 @@
 <div class="usuario-container">
 
-  <h2>📄 Detalles de tu Caso Disciplinario</h2>
+  <h2>📄Detalles de tu Caso Disciplinario</h2>
 
   <div class="card">
     <p><strong>ID del Caso:</strong> {{ caso.id }}</p>
@@ -16,7 +16,7 @@
     </p>
   </div>
 
-  <h3>📌 Avance del Proceso</h3>
+  <h3>📌Avance del Proceso</h3>
 
   <ul class="pasos-lista">
     <li *ngFor="let paso of pasos" [ngClass]="{activo: esPasoActual(paso)}">
@@ -25,5 +25,28 @@
   </ul>
 
   <button class="btn-detalle">Ver Detalle Completo</button>
+
+</div>
+
+<div class="usuario-container">
+  <h2>Historial de Casos Disciplinarios</h2>
+
+  <div class="historial-container">
+    <div class="card historial-card" *ngFor="let casoHistorico of historialCasos">
+      <div class="historial-header">
+        <span class="historial-id">Caso #{{ casoHistorico.id }}</span>
+        <span class="badge small" [ngClass]="casoHistorico.estado">
+          {{ casoHistorico.estado }}
+        </span>
+      </div>
+      <p><strong>Motivo:</strong> {{ casoHistorico.motivo }}</p>
+      <p><strong>Fecha:</strong> {{ casoHistorico.fechaCreacion }}</p>
+      <p class="historial-descripcion"><strong>Descripción:</strong> {{ casoHistorico.descripcion }}</p>
+    </div>
+  </div>
+
+  <div class="no-historial" *ngIf="historialCasos.length === 0">
+    <p>No hay casos anteriores registrados.</p>
+  </div>
 
 </div>

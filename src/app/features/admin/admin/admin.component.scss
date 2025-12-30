@@ -1,3 +1,4 @@
+
 .admin-container {
   padding: 20px;
 }
@@ -7,6 +8,10 @@
   font-weight: bold;
   color: #0a47a1;
   margin-bottom: 15px;
+
+  .emoji {
+    margin-right: 8px;
+  }
 }
 
 .header-toolbar {
@@ -14,6 +19,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .btn-excel {
@@ -23,11 +30,17 @@
   border-radius: 6px;
   border: none;
   font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
 }
 
 .filtros {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .filtro {
@@ -37,11 +50,12 @@
   font-weight: 600;
   border: none;
   cursor: pointer;
-}
+  color: #0a1f44;
 
-.filtro.activo {
-  background: #0d6efd;
-  color: white;
+  &.activo {
+    background: #0d6efd;
+    color: white;
+  }
 }
 
 .badge {
@@ -65,17 +79,19 @@
   width: 100%;
   border-collapse: collapse;
   background: white;
-}
 
-th {
-  background: #0056b3;
-  color: white;
-  padding: 10px;
-}
+  th {
+    background: #0056b3;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    font-weight: 600;
+  }
 
-td {
-  padding: 10px;
-  border-bottom: 1px solid #e0e0e0;
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+  }
 }
 
 .btn-pdf {
@@ -84,4 +100,9 @@ td {
   padding: 6px 12px;
   border-radius: 6px;
   border: none;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
 }
