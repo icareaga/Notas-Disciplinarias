@@ -17,12 +17,15 @@ export class CasosService {
   }
 
   obtenerCasos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/admin/casos-activos/368048`);
+    return this.http.get<any[]>(`${this.apiUrl}/admin/casos-activos`);
   }
 
-  
-descargarPDF(id: number) {
-  return this.http.get(`/api/casos/${id}/pdf`, { responseType: 'blob' });
-}
+  obtenerCasosPorUsuario(idUsuario: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/Casos/usuario/${idUsuario}`);
+  }
+
+  descargarPDF(id: number) {
+    return this.http.get(`/api/casos/${id}/pdf`, { responseType: 'blob' });
+  }
 
 }
