@@ -1,30 +1,36 @@
 <div class="usuario-container">
 
-  <h2>📄Detalles de tu Caso Disciplinario</h2>
+  <h2>Detalles de tu Caso Disciplinario</h2>
 
-  <div class="card">
-    <p><strong>ID del Caso:</strong> {{ caso.id }}</p>
-    <p><strong>Motivo:</strong> {{ caso.motivo }}</p>
-    <p><strong>Descripción:</strong> {{ caso.descripcion }}</p>
-    <p><strong>Fecha de Creación:</strong> {{ caso.fechaCreacion }}</p>
+  @if (caso) {
+    <div class="card">
+      <p><strong>ID del Caso:</strong> {{ caso.id }}</p>
+      <p><strong>Motivo:</strong> {{ caso.motivo }}</p>
+      <p><strong>Descripción:</strong> {{ caso.descripcion }}</p>
+      <p><strong>Fecha de Creación:</strong> {{ caso.fechaCreacion }}</p>
 
-    <p>
-      <strong>Estado:</strong>
-      <span class="badge" [ngClass]="caso.estado">
-        {{ caso.estado }}
-      </span>
-    </p>
-  </div>
+      <p>
+        <strong>Estado:</strong>
+        <span class="badge" [ngClass]="caso.estado">
+          {{ caso.estado }}
+        </span>
+      </p>
+    </div>
 
-  <h3>📌Avance del Proceso</h3>
+    <h3>📌Avance del Proceso</h3>
 
-  <ul class="pasos-lista">
-    <li *ngFor="let paso of pasos" [ngClass]="{activo: esPasoActual(paso)}">
-      {{ paso }}
-    </li>
-  </ul>
+    <ul class="pasos-lista">
+      @for (paso of pasos; track paso) {
+        <li [ngClass]="{activo: esPasoActual(paso)}">
+          {{ paso }}
+        </li>
+      }
+    </ul>
 
-  <button class="btn-detalle">Ver Detalle Completo</button>
+    <button class="btn-detalle">Ver Detalle Completo</button>
+  } @else {
+    <p>No tienes un caso disciplinario activo.</p>
+  }
 
 </div>
 
@@ -32,21 +38,25 @@
   <h2>Historial de Casos Disciplinarios</h2>
 
   <div class="historial-container">
-    <div class="card historial-card" *ngFor="let casoHistorico of historialCasos">
-      <div class="historial-header">
-        <span class="historial-id">Caso #{{ casoHistorico.id }}</span>
-        <span class="badge small" [ngClass]="casoHistorico.estado">
-          {{ casoHistorico.estado }}
-        </span>
+    @for (casoHistorico of historialCasos; track casoHistorico.id) {
+      <div class="card historial-card">
+        <div class="historial-header">
+          <span class="historial-id">Caso #{{ casoHistorico.id }}</span>
+          <span class="badge small" [ngClass]="casoHistorico.estado">
+            {{ casoHistorico.estado }}
+          </span>
+        </div>
+        <p><strong>Motivo:</strong> {{ casoHistorico.motivo }}</p>
+        <p><strong>Fecha:</strong> {{ casoHistorico.fechaCreacion }}</p>
+        <p class="historial-descripcion"><strong>Descripción:</strong> {{ casoHistorico.descripcion }}</p>
       </div>
-      <p><strong>Motivo:</strong> {{ casoHistorico.motivo }}</p>
-      <p><strong>Fecha:</strong> {{ casoHistorico.fechaCreacion }}</p>
-      <p class="historial-descripcion"><strong>Descripción:</strong> {{ casoHistorico.descripcion }}</p>
-    </div>
+    }
   </div>
 
-  <div class="no-historial" *ngIf="historialCasos.length === 0">
-    <p>No hay casos anteriores registrados.</p>
-  </div>
+  @if (historialCasos.length === 0) {
+    <div class="no-historial">
+      <p>No hay casos anteriores registrados.</p>
+    </div>
+  }
 
 </div>

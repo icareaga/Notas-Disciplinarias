@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -82,21 +81,31 @@ export class AdminComponent implements OnInit {
 
   /** Ajusta el caso a la forma necesaria en interfaz */
   private mapearCaso(item: any): CasoUI {
-    // Ajusta estos mapeos a tu API.
-    // Ejemplo asumiendo campos: id, empleadoNombre, motivo, creadoPorNombre,
-    // paso (clave), estado (clave), fecha
-    const estado = (item.estado as EstadoPaso) ?? 'SENALAR_PROBLEMA';
+    const estado = this.mapEstatusToEstado(item.Estatus);
 
     return {
-      id: item.id,
-      empleado: item.empleadoNombre,
-      motivo: item.motivo,
-      levantadoPor: item.creadoPorNombre,
-      pasoActual: this.etiquetaPaso(item.paso),
+      id: item.IdCaso,
+      empleado: item.Empleado,
+      motivo: item.Categoria,
+      levantadoPor: 'Admin', // Placeholder, ajusta si tienes el campo
+      pasoActual: this.etiquetaPaso(estado),
       estado,
       estadoEtiqueta: this.etiquetaEstado(estado),
-      fecha: item.fecha
+      fecha: item.FechaRegistro
     };
+  }
+
+  /** Mapea Estatus del API a EstadoPaso */
+  private mapEstatusToEstado(estatus: string): EstadoPaso {
+    switch (estatus) {
+      case '1': return 'SENALAR_PROBLEMA';
+      case '2': return 'DETERMINAR_CAUSA';
+      case '3': return 'PLAN_ACCION';
+      case '4': return 'EVALUAR_RESULTADOS';
+      case '5': return 'NOTA_INCUMPLIMIENTO';
+      case '6': return 'ACTA_ADMINISTRATIVA';
+      default: return 'SENALAR_PROBLEMA';
+    }
   }
 
   /** Devuelve texto para mostrar del paso actual */
@@ -226,4 +235,3 @@ export class AdminComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 }
-``
