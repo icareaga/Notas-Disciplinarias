@@ -1,59 +1,105 @@
-# NotasDisciplinarias
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.3.
+# Notas Disciplinarias
 
-## Development server
+Este proyecto corresponde al **frontend** de la aplicación para la gestión de notas disciplinarias. Está desarrollado con **Angular** y fue generado utilizando [Angular CLI](https://github.com/angular/angular-cli) versión 20.3.3.
 
-To start a local development server, run:
+---
 
-```bash
+## 📌 Descripción
+La aplicación permite gestionar notas disciplinarias de manera eficiente, ofreciendo una interfaz amigable para interactuar con la API del sistema.
+
+---
+
+## ✅ Requisitos previos
+Antes de ejecutar el proyecto, asegúrate de tener instalado:
+- https://nodejs.org/ (versión recomendada: 18+)
+- https://angular.dev/tools/cli
+- Un editor de código (Visual Studio Code recomendado)
+
+---
+
+## 🚀 Servidor de desarrollo
+Para iniciar un servidor local de desarrollo, ejecuta:
+
+bash
 ng serve
-```
+Luego, abre tu navegador y navega a:
+http://localhost:4200/
+La aplicación se recargará automáticamente cada vez que modifiques los archivos fuente.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## 🛠️ Generación de código (Scaffolding)
+Angular CLI incluye herramientas para generar componentes, directivas y más.
+Para crear un nuevo componente, ejecuta:
 
-## Code scaffolding
+ng generate component nombre-del-compone
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Para ver la lista completa de esquemas disponibles (componentes, directivas, pipes, etc.), ejecuta:
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
 ng generate --help
-```
 
-## Building
+## 📦 Construcción del proyecto
+Para compilar el proyecto, ejecuta:
 
-To build the project run:
-
-```bash
 ng build
-```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Esto generará los artefactos de compilación en el directorio dist/.
+Por defecto, la compilación para producción optimiza la aplicación para rendimiento y velocidad.
 
-## Running unit tests
+## ✅ Pruebas unitarias
+Para ejecutar pruebas unitarias con https://karma-runner.github.io, utiliza:
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
 ng test
-```
 
-## Running end-to-end tests
+## 📂 Estructura del proyecto
 
-For end-to-end (e2e) testing, run:
+src/
+  app/
+    features/                # Módulos y funcionalidades principales
+      acta-administrativa/   # Gestión de actas administrativas
+      admin/                 # Panel de administración
+      determinar-causa/      # Módulo para determinar causas
+      evaluar-resultados/    # Evaluación de resultados
+      login/                 # Pantalla de inicio de sesión
+      nota-incumplimiento/   # Gestión de notas por incumplimiento
+      plan-accion/           # Planes de acción correctiva
+      senalar-problema/      # Reporte de problemas
+      usuario/               # Gestión de usuarios
+    models/                  # Modelos de datos (interfaces TypeScript)
+      caso-admin.model.ts
+      caso-create.model.ts
+      categoria.model.ts
+    services/                # Servicios para comunicación con la API
+      casos.service.ts
+      categorias.service.ts
+      usuarios.service.ts
+    app.component.ts          # Componente raíz de la aplicación
+    app.component.scss        # Estilos del componente raíz
+    app.config.ts             # Configuración global
+    app.routes.ts             # Definición de rutas
+    app.html                  # Plantilla principal
+    app.spec.ts               # Pruebas del componente raíz
+  assets/img/                # Imágenes y recursos gráficos
+    Logo.jpg
+    mega-building.jpg
+    mega-icon.ico
+  index.html                 # Archivo HTML principal
+  main.ts                    # Punto de entrada de la aplicación
+  styles.scss                # Estilos globales
+.editorconfig               # Configuración de estilo de código
+angular.json                # Configuración del proyecto Angular
+package.json                # Dependencias y scripts del proyecto
+package-lock.json           # Bloqueo de dependencias
+README.md                   # Documentación del proyecto
+tsconfig.app.json           # Configuración TypeScript para la aplicación
+tsconfig.json               # Configuración global de TypeScript
+tsconfig.spec.json          # Configuración TypeScript para pruebas
 
-```bash
-ng e2e
-```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## 🌐 Relación con otros repositorios
+Este proyecto se conecta con el backend disponible en el repositorio:
+NotasDisciplinarias.API 
 
-## Additional Resources
+📚 Recursos adicionales
+Para más información sobre Angular CLI y referencias detalladas de comandos, visita:
+https://angular.dev/tools/cli
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
