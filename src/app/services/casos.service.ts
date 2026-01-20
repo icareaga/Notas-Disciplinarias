@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CasoCreate } from '../models/caso-create.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CasosService {
 
-  private apiUrl = 'http://localhost:5269/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -25,7 +26,7 @@ export class CasosService {
   }
 
   descargarPDF(id: number) {
-    return this.http.get(`/api/casos/${id}/pdf`, { responseType: 'blob' });
+    return this.http.get(`${this.apiUrl}/casos/${id}/pdf`, { responseType: 'blob' });
   }
 
 }

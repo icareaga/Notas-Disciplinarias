@@ -1,30 +1,106 @@
-  <div class="login-background">
+<div class="login-background">
   <div class="login-card">
-  <h1>Notas Disciplinarias</h1>
-  <h3>Sistema de Notas de Incumplimiento</h3>
-  <p>Bienvenido</p>
-  <h3>Ingresa a tu plataforma</h3>
-  <form (ngSubmit)="login()">
-  <!-- ID de Usuario -->
-  <input
-        type="number"
-        [(ngModel)]="username"
-        name="username"
-        placeholder="ID de Usuario"
-        required
-      />
-  <!-- Contraseña -->
-  <input
-        type="password"
-        [(ngModel)]="password"
-        name="password"
-        placeholder="Contraseña"
-        required
-      />
-  <button type="submit">Ingresar</button>
-  </form>
-  <p class="error" *ngIf="errorMessage">
-      {{ errorMessage }}
-  </p>
+    <div class="logo-section">
+      <h1>📘 Notas Disciplinarias</h1>
+      <h3>Sistema de Notas de Incumplimiento</h3>
+    </div>
+
+    @if (isLoggedIn && usuarioData) {
+      <div class="bienvenida-section">
+        <div class="saludo">
+          <h2>¡Bienvenido de nuevo!</h2>
+          <p class="nombre-destacado">{{ usuarioData.Nombre_Completo || usuarioData.Nombre || 'Usuario' }}</p>
+          <p class="mensaje-cordial">Es un gusto tenerte aquí. A continuación puedes ver tu información de acceso:</p>
+        </div>
+
+        <div class="info-usuario">
+          <h4>Información del Usuario</h4>
+          <div class="datos-grid">
+            <div class="dato-item">
+              <span class="icono">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--emojione-monotone" preserveAspectRatio="xMidYMid meet" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M39 19.434h-5.384v25.133H39c2.969 0 5.386-2.322 5.386-5.174V24.609c0-2.853-2.417-5.175-5.386-5.175" fill="#000000"></path><path d="M52 2H12C6.477 2 2 6.477 2 12v40c0 5.523 4.477 10 10 10h40c5.523 0 10-4.477 10-10V12c0-5.523-4.477-10-10-10M23 49h-4V15h4v34m26-9.607a9.251 9.251 0 0 1-.787 3.738a9.592 9.592 0 0 1-2.143 3.055a10.032 10.032 0 0 1-3.178 2.059A10.302 10.302 0 0 1 39 49H29V15h10c1.348 0 2.657.254 3.893.754c1.19.484 2.26 1.176 3.178 2.059s1.638 1.912 2.143 3.053A9.294 9.294 0 0 1 49 24.609v14.784" fill="#000000"></path></g></svg>
+              </span>
+              <div class="dato-contenido">
+                <span class="label">ID de Usuario</span>
+                <span class="valor">{{ usuarioData.Id || usuarioData.UserId || 'N/A' }}</span>
+              </div>
+            </div>
+
+            <div class="dato-item">
+
+              <span class="icono">
+                <svg fill="#000000" viewBox="0 0 52 52" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M38.3,27.2A11.4,11.4,0,1,0,49.7,38.6,11.46,11.46,0,0,0,38.3,27.2Zm2,12.4a2.39,2.39,0,0,1-.9-.2l-4.3,4.3a1.39,1.39,0,0,1-.9.4,1,1,0,0,1-.9-.4,1.39,1.39,0,0,1,0-1.9l4.3-4.3a2.92,2.92,0,0,1-.2-.9,3.47,3.47,0,0,1,3.4-3.8,2.39,2.39,0,0,1,.9.2c.2,0,.2.2.1.3l-2,1.9a.28.28,0,0,0,0,.5L41.1,37a.38.38,0,0,0,.6,0l1.9-1.9c.1-.1.4-.1.4.1a3.71,3.71,0,0,1,.2.9A3.57,3.57,0,0,1,40.3,39.6Z"></path> <circle cx="21.7" cy="14.9" r="12.9"></circle> <path d="M25.2,49.8c2.2,0,1-1.5,1-1.5h0a15.44,15.44,0,0,1-3.4-9.7,15,15,0,0,1,1.4-6.4.77.77,0,0,1,.2-.3c.7-1.4-.7-1.5-.7-1.5h0a12.1,12.1,0,0,0-1.9-.1A19.69,19.69,0,0,0,2.4,47.1c0,1,.3,2.8,3.4,2.8H24.9C25.1,49.8,25.1,49.8,25.2,49.8Z"></path> </g></svg>
+              </span>
+              <div class="dato-contenido">
+                <span class="label">Rol</span>
+                <span class="valor">{{ usuarioData.Rol || usuarioData.Role || 'N/A' }}</span>
+              </div>
+            </div>
+
+            <div class="dato-item">
+              <span class="icono">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect width="24" height="24" fill="white"></rect> <path fill-rule="evenodd" clip-rule="evenodd" d="M5.96802 4H18.032C18.4706 3.99999 18.8491 3.99998 19.1624 4.02135C19.4922 4.04386 19.8221 4.09336 20.1481 4.22836C20.8831 4.53284 21.4672 5.11687 21.7716 5.85195C21.9066 6.17788 21.9561 6.50779 21.9787 6.83762C22 7.15088 22 7.52936 22 7.96801V16.032C22 16.4706 22 16.8491 21.9787 17.1624C21.9561 17.4922 21.9066 17.8221 21.7716 18.1481C21.4672 18.8831 20.8831 19.4672 20.1481 19.7716C19.8221 19.9066 19.4922 19.9561 19.1624 19.9787C18.8491 20 18.4706 20 18.032 20H5.96801C5.52936 20 5.15088 20 4.83762 19.9787C4.50779 19.9561 4.17788 19.9066 3.85195 19.7716C3.11687 19.4672 2.53284 18.8831 2.22836 18.1481C2.09336 17.8221 2.04386 17.4922 2.02135 17.1624C1.99998 16.8491 1.99999 16.4706 2 16.032V7.96802C1.99999 7.52937 1.99998 7.15088 2.02135 6.83762C2.04386 6.50779 2.09336 6.17788 2.22836 5.85195C2.53284 5.11687 3.11687 4.53284 3.85195 4.22836C4.17788 4.09336 4.50779 4.04386 4.83762 4.02135C5.15088 3.99998 5.52937 3.99999 5.96802 4ZM4.31745 6.27777C4.68114 5.86214 5.3129 5.82002 5.72854 6.1837L11.3415 11.095C11.7185 11.4249 12.2815 11.4249 12.6585 11.095L18.2715 6.1837C18.6871 5.82002 19.3189 5.86214 19.6825 6.27777C20.0462 6.69341 20.0041 7.32517 19.5885 7.68885L13.9755 12.6002C12.8444 13.5899 11.1556 13.5899 10.0245 12.6002L4.41153 7.68885C3.99589 7.32517 3.95377 6.69341 4.31745 6.27777Z" fill="#323232"></path> </g></svg>
+              </span>
+              <div class="dato-contenido">
+                <span class="label">Correo Electrónico</span>
+                <span class="valor">{{ usuarioData.Correo || usuarioData.Email || 'N/A' }}</span>
+              </div>
+            </div>
+
+            @if (usuarioData.Area) {
+              <div class="dato-item">
+                <span class="icono">
+                  <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M896 896H128V192l384-149.333333 384 149.333333z" fill="#000000"></path><path d="M128 896h768v42.666667H128z" fill="#9FA8DA"></path><path d="M426.666667 746.666667h170.666666v192h-170.666666z" fill="#ffffff"></path><path d="M661.333333 576h128v106.666667h-128zM448 576h128v106.666667h-128zM234.666667 576h128v106.666667h-128zM661.333333 746.666667h128v106.666666h-128zM234.666667 746.666667h128v106.666666h-128zM661.333333 405.333333h128v106.666667h-128zM448 405.333333h128v106.666667h-128zM234.666667 405.333333h128v106.666667h-128zM661.333333 234.666667h128v106.666666h-128zM448 234.666667h128v106.666666h-128zM234.666667 234.666667h128v106.666666h-128z" fill="#ffffff"></path></g></svg>
+                </span>
+                <div class="dato-contenido">
+                  <span class="label">Área</span>
+                  <span class="valor">{{ usuarioData.Area }}</span>
+                </div>
+              </div>
+            }
+
+            @if (usuarioData.Departamento) {
+              <div class="dato-item">
+                <span class="icono">
+                  <svg fill="#000000" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 236 256" enable-background="new 0 0 236 256" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M117.5,2c-12.47,0-22.63,10.16-22.63,22.63c0,12.46,10.06,22.62,22.63,22.62c12.37,0,22.62-10.16,22.62-22.62 C140.12,12.16,129.97,2,117.5,2z M146,52H89c-15.59,0-28,13.41-28,29v32h20V86c0-1.71,1.29-3,3-3s3,1.29,3,3v27h61V86 c0-1.71,1.29-3,3-3s3,1.29,3,3v27h20V81C174,65.51,161.49,52,146,52z M109.48,154.61v9.38h16.96v-9.38H109.48z M109.48,154.61v9.38 h16.96v-9.38H109.48z M2,118v27h23v109h185V145h24v-27H2z M87.38,227.46h-6.95c-4.8,0-9.43-3.57-9.43-9.72c0,0,0-44.11,0-44.28 c0-5.48,4.55-9.63,9.43-9.63h6.95V227.46z M143.9,227.54H92.1v-63.55h12.66v-9.13c0-3.33,2.98-5.4,6.45-5.4h13.49 c3.56,0,6.46,2.07,6.46,5.4v9.13h12.74V227.54z M165,217.74c0,6.15-4.63,9.72-9.43,9.72h-6.95v-63.63h6.95 c4.88,0,9.43,4.15,9.43,9.63C165,173.63,165,217.74,165,217.74z M109.48,163.99h16.96v-9.38h-16.96V163.99z M109.48,154.61v9.38 h16.96v-9.38H109.48z M109.48,154.61v9.38h16.96v-9.38H109.48z"></path> </g></svg>
+                </span>
+                <div class="dato-contenido">
+                  <span class="label">Departamento</span>
+                  <span class="valor">{{ usuarioData.Departamento }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="acciones">
+          <!-- Botones comentados temporalmente hasta definir navegación -->
+          <!--
+          <button class="btn-continuar" (click)="continuar()">
+            <span>Continuar al Sistema</span>
+            <span class="flecha">→</span>
+          </button>
+          
+          <button class="btn-ver-notas" (click)="verNotas()">
+            <span>👁️ Ver Notas</span>
+          </button>
+
+          @if (isAdmin() || isPlazaJefe()) {
+            <button class="btn-abrir-notas" (click)="abrirNotas()">
+              <span>✍️ Abrir Notas</span>
+            </button>
+          }
+          -->
+        </div>
+      </div>
+    } @else {
+      <div class="no-auth">
+        <div class="icono-auth">
+          <svg height="200px" width="200px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0{fill:#000000;} </style> <g> <path class="st0" d="M510.158,392.021l-45.585-57.325V93.613c0-11.662-9.457-21.12-21.119-21.12H68.546 c-11.662,0-21.111,9.458-21.111,21.12v241.082L1.841,392.021C0.649,393.516,0,395.366,0,397.285v25.373 c0,9.311,7.548,16.849,16.85,16.849H495.15c9.302,0,16.85-7.538,16.85-16.849v-25.373C512,395.366,511.351,393.516,510.158,392.021 z M77.226,102.293h357.547v202.604H77.226V102.293z M304.122,419.469h-96.244v-25.478h96.244V419.469z"></path> <path class="st0" d="M291.552,186.314c0-9.786-3.994-18.734-10.417-25.14c-6.406-6.414-15.345-10.416-25.14-10.409 c-9.786-0.008-18.734,3.994-25.131,10.409c-6.414,6.407-10.417,15.354-10.417,25.14v12.508h-11.472v43.38 c0,12.571,10.193,22.746,22.762,22.746h48.533c12.561,0,22.754-10.175,22.754-22.746v-43.38h-11.472V186.314z M237.703,186.314 c0-2.55,0.519-4.937,1.435-7.124c1.384-3.268,3.717-6.086,6.639-8.058c2.931-1.98,6.406-3.112,10.218-3.12 c2.55,0,4.936,0.518,7.124,1.435c3.276,1.383,6.086,3.717,8.058,6.648c1.97,2.913,3.112,6.388,3.12,10.218v12.508h-36.594V186.314z "></path> </g> </g></svg>
+        </div>
+        <h3>Acceso Restringido</h3>
+        <p>Por favor, ingresa a través del sistema de autenticación corporativa ItGov para acceder al sistema.</p>
+      </div>
+    }
   </div>
-  </div>
+</div>

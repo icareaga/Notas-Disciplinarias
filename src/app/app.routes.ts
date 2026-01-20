@@ -14,6 +14,7 @@ import { LoginComponent } from './features/login/login.component';
 
 
 
+// Mapa de rutas principales para cada flujo de la app
 export const routes: Routes = [
   { path: '', redirectTo: 'senalar-problema', pathMatch: 'full' },
   { path: 'senalar-problema', component: SenalarProblemaComponent },

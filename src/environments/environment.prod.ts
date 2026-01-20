@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: "https://localhost:7199/api"
+    apiUrl: "https://mirh.megacorp.com.mx:84/api"
 };
