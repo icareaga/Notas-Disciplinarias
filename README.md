@@ -1,52 +1,322 @@
+# 📘 Sistema de Notas Disciplinarias
 
-# Notas Disciplinarias
-
-Este proyecto corresponde al **frontend** de la aplicación para la gestión de notas disciplinarias. Está desarrollado con **Angular** y fue generado utilizando [Angular CLI](https://github.com/angular/angular-cli) versión 20.3.3.
-
----
-
-## 📌 Descripción
-La aplicación permite gestionar notas disciplinarias de manera eficiente, ofreciendo una interfaz amigable para interactuar con la API del sistema.
+Sistema Angular para gestión de notas disciplinarias de empleados en Megacable. Los jefes pueden crear, ver y gestionar notas de incumplimiento de sus subordinados.
 
 ---
 
-## ✅ Requisitos previos
-Antes de ejecutar el proyecto, asegúrate de tener instalado:
-- https://nodejs.org/ (versión recomendada: 18+)
-- https://angular.dev/tools/cli
-- Un editor de código (Visual Studio Code recomendado)
+## 🚀 Quick Start
 
----
+```bash
+# 1. Instalar dependencias
+npm install
 
-## 🚀 Servidor de desarrollo
-Para iniciar un servidor local de desarrollo, ejecuta:
+# 2. Asegúrate que el backend corre en puerto 7199
+# (Visual Studio: apunta a https://localhost:7199)
 
-bash
+# 3. Inicia Angular
 ng serve
-Luego, abre tu navegador y navega a:
-http://localhost:4200/
-La aplicación se recargará automáticamente cada vez que modifiques los archivos fuente.
 
-## 🛠️ Generación de código (Scaffolding)
-Angular CLI incluye herramientas para generar componentes, directivas y más.
-Para crear un nuevo componente, ejecuta:
+# 4. Abre el navegador
+http://localhost:4200
 
-ng generate component nombre-del-compone
+# 5. Si no tienes token de ItGov, simula uno:
+http://localhost:4200?acces_token=TU_JWT_TOKEN_AQUI
+```
 
-Para ver la lista completa de esquemas disponibles (componentes, directivas, pipes, etc.), ejecuta:
+---
 
-ng generate --help
+## 📖 Documentación
 
-## 📦 Construcción del proyecto
-Para compilar el proyecto, ejecuta:
+| Documento | Contenido |
+|-----------|-----------|
+| **[ARQUITECTURA.md](ARQUITECTURA.md)** | 🏗️ Flujos completos, estructura de carpetas, endpoints |
+| **[GUIA_RAPIDA.md](GUIA_RAPIDA.md)** | ⚡ Debugging, errores comunes, tareas frecuentes |
+| **[DICCIONARIO_DATOS.md](DICCIONARIO_DATOS.md)** | 📋 Estructuras de datos, modelos, validaciones |
 
-ng build
+---
 
-Esto generará los artefactos de compilación en el directorio dist/.
-Por defecto, la compilación para producción optimiza la aplicación para rendimiento y velocidad.
+## 🎯 Flujo Principal (3 pasos)
 
-## ✅ Pruebas unitarias
-Para ejecutar pruebas unitarias con https://karma-runner.github.io, utiliza:
+### 1. Usuario se Autentica
+```
+ItGov → Redirige a Angular con JWT en URL
+  ↓
+AppComponent captura token
+  ↓
+Decodifica con AuthService
+  ↓
+Guarda en localStorage
+  ↓
+Muestra LoginComponent
+```
+
+### 2. Admin Abre Notas
+```
+LoginComponent → Click "Abrir Notas de Empleados"
+  ↓
+SenalarProblemaComponent
+  ↓
+Carga lista de subordinados
+  ↓
+Muestra dropdown
+```
+
+### 3. Admin Crea Nota
+```
+Selecciona: Empleado + Categoría + Descripción
+  ↓
+POST /api/Casos/crear
+  ↓
+Backend guarda en BD
+  ↓
+Confirmación: ¡Caso creado!
+```
+
+---
+
+## 🏗️ Estructura del Proyecto
+
+```
+src/app/
+├── app.component.ts              ← 🔐 Captura token, header/footer
+├── app.routes.ts                 ← 🔀 Definición de rutas
+│
+├── services/                     ← 🌐 HTTP + lógica
+│   ├── auth.service.ts           ← Decodifica JWT
+│   ├── usuarios.service.ts       ← GET subordinados
+│   ├── casos.service.ts          ← CRUD notas
+│   └── categorias.service.ts     ← Catálogo
+│
+├── models/                       ← 📊 Interfaces TypeScript
+│   ├── caso-create.model.ts
+│   └── categoria.model.ts
+│
+└── features/                     ← 🎨 Componentes
+    ├── login/                    ← 👋 Bienvenida
+    ├── senalar-problema/         ← ✍️ Crear notas
+    ├── usuario/                  ← 👁️ Ver mis notas
+    └── admin/                    ← ⚙️ Panel admin
+```
+
+---
+
+## 🔧 Tecnologías
+
+- **Angular 17** - Framework
+- **TypeScript** - Lenguaje
+- **jwt-decode** - Decodificar JWT
+- **RxJS** - Observables (Async)
+- **SCSS** - Estilos
+- **Proxy** - Evitar CORS en desarrollo
+
+---
+
+## 🔌 Endpoints (Backend en puerto 7199)
+
+```
+GET    /api/Usuarios/jerarquia/{idUsuario}  → Obtener subordinados
+POST   /api/Casos/crear                     → Crear nota
+GET    /api/Casos/usuario/{idUsuario}       → Ver mis notas
+GET    /api/admin/casos-activos             → Ver todas (admin)
+GET    /api/Categorias                      → Catálogo
+```
+
+---
+
+## 🧪 Developers: Empieza aquí
+
+### 1. Lee la documentación en este orden
+1. Este README (estás aquí)
+2. [ARQUITECTURA.md](ARQUITECTURA.md) - Entiende flujos
+3. [DICCIONARIO_DATOS.md](DICCIONARIO_DATOS.md) - Modelos de datos
+4. [GUIA_RAPIDA.md](GUIA_RAPIDA.md) - Debugging
+
+### 2. Revisa los comentarios en código
+```typescript
+// Cada archivo .ts tiene comentarios detallados explicando:
+// - QUÉ hace (responsabilidad)
+// - POR QUÉ se hace así (motivación)
+// - CÓMO se integra (relaciones)
+
+// Archivos principales comentados:
+- src/app/app.component.ts
+- src/app/services/auth.service.ts
+- src/app/services/usuarios.service.ts
+- src/app/features/senalar-problema/senalar-problema.component.ts
+```
+
+### 3. Prueba el flujo
+```bash
+# Terminal 1: Angular
+ng serve
+
+# Terminal 2: Backend (Visual Studio) en puerto 7199
+
+# Browser: http://localhost:4200?acces_token=TOKEN
+```
+
+---
+
+## 🐛 Debugging
+
+### Ver estado en consola (F12)
+```javascript
+// Abre: http://localhost:4200?acces_token=...
+// Ve la consola y busca:
+
+🌐 AppComponent iniciado
+🔑 TOKEN CAPTURADO desde URL: eyJ0...
+✅ Usuario guardado: { Id: 12345, Nombre_Completo: "Juan..." }
+📋 Respuesta completa de API: { resultados: [...] }
+✅ Empleados cargados: 5
+```
+
+### Si no ves empleados en dropdown
+```
+1. Abre F12 → Console
+2. Busca "📋 Respuesta completa de API"
+3. Verifica data.resultados existe
+4. Si no, revisa GUIA_RAPIDA.md → "¿El dropdown no muestra empleados?"
+```
+
+---
+
+## 📁 Archivos Importantes
+
+| Archivo | Función |
+|---------|---------|
+| `proxy.conf.json` | Redirige /api a localhost:7199 |
+| `angular.json` | Configuración de Angular |
+| `src/environments/` | URLs por entorno (dev/prod) |
+| `src/index.html` | HTML principal + favicon |
+| `src/styles.scss` | Estilos globales |
+
+---
+
+## 🚨 Errores Comunes
+
+### ❌ "404 Not Found en /api/Usuarios/jerarquia"
+```
+✅ Solución: Verifica que backend corre en puerto 7199
+```
+
+### ❌ "No se puede parsear token"
+```
+✅ Solución: Obtén un JWT válido de ItGov
+           O crea uno en: https://jwt.io
+```
+
+### ❌ "El dropdown está vacío"
+```
+✅ Solución: Ver sección "Debugging" arriba
+```
+
+---
+
+## 📝 Notas Importantes
+
+- ✅ Autenticación centralizada en `AuthService`
+- ✅ Todas las rutas HTTP en servicios `src/app/services/`
+- ✅ Todos los datos de usuario vienen del JWT
+- ✅ LocalStorage guarda token + usuario decodificado
+- ✅ Proxy intercepta `/api/*` en desarrollo
+- ✅ Backend valida todo (no confiar solo en frontend)
+
+---
+
+## 🔐 Seguridad
+
+- ✅ Token se guarda en localStorage (considerar sessionStorage)
+- ✅ JWT se decodifica pero NO se valida firma (confiar en ItGov)
+- ✅ URL se limpia después de capturar token
+- ✅ TODO: Agregar validación de token expirado
+- ✅ TODO: Agregar Auth Guards en rutas protegidas
+
+---
+
+## 🔄 Próximas Mejoras
+
+- [ ] Auth Guard para proteger rutas
+- [ ] Validar token expirado antes de cada petición
+- [ ] Interceptor HTTP para pasar token en headers
+- [ ] Traer categorías del backend (no hardcodear)
+- [ ] Tests unitarios e integración
+- [ ] Error handling más robusto
+- [ ] Logout limpiar correctamente
+- [ ] Caché de datos (memo)
+- [ ] Paginación en listas
+
+---
+
+## 💬 Preguntas Frecuentes
+
+**P: ¿Cómo debuggear acciones?**  
+R: Abre F12 → Console → busca logs con emoji (🔐, 🌐, ✅, etc)
+
+**P: ¿Puedo ver el token decodificado?**  
+R: `localStorage.getItem('usuario') | json` en template, o console.log()
+
+**P: ¿Cuál es el ciclo de una nota?**  
+R: Creación → Acción → Evaluación → (Resolución o Acta)
+
+**P: ¿Solo jefes pueden crear notas?**  
+R: Sí, el backend valida basado en si tienes subordinados
+
+---
+
+## 🤝 Contribución
+
+```bash
+# Antes de pushear:
+1. Comenta tu código explicando QUÉ y POR QUÉ
+2. Actualiza ARQUITECTURA.md si cambian flujos
+3. Prueba en consola (F12) que los logs salen
+4. Verifica que el backend devuelve lo esperado
+```
+
+---
+
+## 📞 Contacto
+
+- 📧 **Backend** (Visual Studio): Tu equipo
+- 📧 **Frontend** (Angular): Este repo
+- 🔐 **Auth** (ItGov): Sistema corporativo
+
+---
+
+## 📚 Referencias
+
+- [Angular Docs](https://angular.io)
+- [jwt-decode](https://github.com/auth0/jwt.io)
+- [RxJS Docs](https://rxjs.dev)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs)
+
+---
+
+## 📄 Licencia
+
+© 2025 Megacable - Sistema Interno
+
+---
+
+**Última actualización**: Enero 2026  
+**Versión**: 1.0  
+**Ambiente**: Desarrollo
+
+---
+
+### 🎓 Para Nuevo Desarrollador
+
+1. Lee este README (5 min)
+2. Lee [ARQUITECTURA.md](ARQUITECTURA.md) (15 min)
+3. Lee los comentarios en código (20 min)
+4. Ejecuta `ng serve` (2 min)
+5. Abre DevTools F12 y prueba (10 min)
+6. ¡Ya estás listo! (Total: ~1 hora)
+
+---
+
+**¿Necesitas ayuda?** Revisa los comentarios en los archivos .ts 📝
 
 ng test
 

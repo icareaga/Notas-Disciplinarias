@@ -1,4 +1,4 @@
 export const environment = {
     production: false,
-    apiUrl: "https://mirh.megacorp.com.mx:84/api"
+    apiUrl: "/api"  // Usar proxy en desarrollo para evitar CORS
 };

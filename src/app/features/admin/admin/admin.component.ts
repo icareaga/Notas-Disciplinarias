@@ -54,10 +54,12 @@ export class AdminComponent implements OnInit {
   };
 
   // Formulario crear caso:
-  nuevoCaso: CasoCreate = {
+    nuevoCaso: CasoCreate = {
     idUsuarioAfectado: 0,
     idCategoria: 0,
-    descripcion: ''
+    descripcion: '',
+    impacto: '',
+    conducta: ''
   };
 
   constructor(private casosService: CasosService) {}
@@ -185,7 +187,7 @@ export class AdminComponent implements OnInit {
 
     this.casosService.crearCaso(this.nuevoCaso).subscribe({
       next: () => {
-        this.nuevoCaso = { idUsuarioAfectado: 0, idCategoria: 0, descripcion: '' };
+        this.nuevoCaso = { idUsuarioAfectado: 0, idCategoria: 0, descripcion: '', impacto: '', conducta: '' };
         this.cargarCasos();
       },
       error: () => alert('Error al crear el caso')

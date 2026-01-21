@@ -119,15 +119,47 @@
       margin-top: 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
 
       button {
-        padding: 10px 16px;
+        padding: 12px 20px;
         font-size: 14px;
+        font-weight: 500;
         border-radius: 6px;
-        border: 1px solid #ccc;
-        background: #f7f7f7;
-        color: #222;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+
+      .btn-ver-notas {
+        background: #0046AD;
+        color: white;
+
+        &:hover {
+          background: #003580;
+        }
+      }
+
+      .btn-abrir-notas {
+        background: #28a745;
+        color: white;
+
+        &:hover {
+          background: #218838;
+        }
       }
     }
   }

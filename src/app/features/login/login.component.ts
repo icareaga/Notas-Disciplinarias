@@ -151,7 +151,7 @@ export class LoginComponent implements OnInit {
 
   abrirNotas() {
     console.log('✍️ Abrir notas (Admin)...');
-    this.router.navigate(['/nota-incumplimiento']);
+    this.router.navigate(['/senalar-problema']);
   }
 
   isAdmin(): boolean {

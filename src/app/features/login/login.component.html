@@ -10,7 +10,8 @@
         <div class="saludo">
           <h2>¡Bienvenido de nuevo!</h2>
           <p class="nombre-destacado">{{ usuarioData.Nombre_Completo || usuarioData.Nombre || 'Usuario' }}</p>
-          <p class="mensaje-cordial">Es un gusto tenerte aquí. A continuación puedes ver tu información de acceso:</p>
+          <p class="mensaje-cordial">Es un gusto tenerte aquí.</p>
+          <p class="mensaje-cordial">A continuación puedes ver tu información de acceso:</p>
         </div>
 
         <div class="info-usuario">
@@ -74,23 +75,17 @@
         </div>
 
         <div class="acciones">
-          <!-- Botones comentados temporalmente hasta definir navegación -->
-          <!--
-          <button class="btn-continuar" (click)="continuar()">
-            <span>Continuar al Sistema</span>
-            <span class="flecha">→</span>
-          </button>
-          
+          <!-- Ver Notas: disponible para todos -->
           <button class="btn-ver-notas" (click)="verNotas()">
-            <span>👁️ Ver Notas</span>
+            <span>👁️ Ver Mis Notas</span>
           </button>
 
-          @if (isAdmin() || isPlazaJefe()) {
+          <!-- Abrir Notas: solo para administradores -->
+          @if (isAdmin()) {
             <button class="btn-abrir-notas" (click)="abrirNotas()">
-              <span>✍️ Abrir Notas</span>
+              <span>✍️ Abrir Notas de Empleados</span>
             </button>
           }
-          -->
         </div>
       </div>
     } @else {

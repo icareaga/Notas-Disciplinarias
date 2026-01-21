@@ -3,6 +3,28 @@ import { Router, NavigationEnd, ActivatedRoute, RouterOutlet } from '@angular/ro
 import { filter } from 'rxjs/operators';
 import { AuthService } from './services/auth.service';
 
+/**
+ * APPCOMPONENT - Componente raíz de la aplicación
+ * 
+ * RESPONSABILIDADES CLAVE:
+ * 1. Capturar el token JWT enviado por ItGov en la URL como query parameter
+ * 2. Decodificar el token y guardar datos del usuario en localStorage
+ * 3. Renderizar header, footer y router-outlet para las demás vistas
+ * 
+ * FLUJO DE AUTENTICACIÓN (desde ItGov):
+ * 1. Usuario hace click en ItGov para acceder a "Notas Disciplinarias"
+ * 2. ItGov redirige a: http://localhost:4200/senalar-problema?acces_token=JWT_TOKEN_AQUI
+ * 3. AppComponent.ngOnInit() detecta el token en la URL
+ * 4. Decodifica el token usando AuthService.getTokenInfo()
+ * 5. Guarda token y datos en localStorage
+ * 6. Redirige a /login para mostrar bienvenida
+ * 7. Limpia la URL quitando el query parameter por seguridad
+ * 
+ * ESTRUCTURA:
+ * - Header: Logo y título (visible en todas las páginas)
+ * - Main: router-outlet (aquí va el contenido dinámico: login, senalar-problema, etc)
+ * - Footer: Copyright (visible en todas las páginas)
+ */
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -35,7 +57,7 @@ export class AppComponent implements OnInit {
     // Capturar token entregado por ItGov si llegó en el query string
     this.checkTokenInUrl();
     
-    // Escuchar cambios de navegación
+    // Escuchar cambios de navegación por si el token llega después
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
@@ -43,6 +65,15 @@ export class AppComponent implements OnInit {
     });
   }
 
+  /**
+   * Verifica si hay un token en la URL (enviado por ItGov)
+   * Si existe y no está guardado, lo guarda y redirige a login
+   * 
+   * Intenta múltiples nombres de query parameter:
+   * - acces_token (nombre de ItGov)
+   * - access_token (estándar)
+   * - token (fallback)
+   */
   private checkTokenInUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('acces_token') || urlParams.get('access_token') || urlParams.get('token');
@@ -51,16 +82,16 @@ export class AppComponent implements OnInit {
       console.log('🔑 TOKEN CAPTURADO desde URL:', token.substring(0, 20) + '...');
       console.log('📍 Ruta actual:', window.location.pathname);
       
-      // Guardar token
+      // Guardar token en localStorage
       localStorage.setItem('token', token);
       
-      // Decodificar y guardar usuario
+      // Decodificar y guardar info del usuario desde el JWT
       const tokenInfo = this.authService.getTokenInfo();
       if (tokenInfo) {
         localStorage.setItem('usuario', JSON.stringify(tokenInfo));
         console.log('✅ Usuario guardado:', tokenInfo);
         
-        // Redirigir a login para mostrar bienvenida
+        // Redirigir a login para mostrar pantalla de bienvenida
         this.router.navigate(['/login'], { queryParams: {} });
       }
     }
