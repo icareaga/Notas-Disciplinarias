@@ -3,29 +3,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
  
 import { CasoCreate } from '../../../models/caso-create.model';
+import { Categoria } from '../../../models/categoria.model';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { CasosService } from '../../../services/casos.service';
+import { CategoriasService } from '../../../services/categorias.service';
 
 /**
  * SENALARPROBLEMACOMPONENT - Formulario principal para crear notas disciplinarias
  * 
  * RESPONSABILIDADES:
- * 1. Mostrar lista de empleados subordinados del jefe autenticado
- * 2. Permitir seleccionar un empleado, categoría y describir el problema
- * 3. Enviar la nota al backend para guardarla
- * 
- * FLUJO:
- * 1. ngOnInit(): Lee el ID del usuario autenticado desde localStorage (viene del token JWT)
- * 2. Llama a UsuariosService.obtenerJerarquia(idUsuario) para traer sus subordinados
- * 3. Muestra dropdown con empleados para que el jefe seleccione a quién crear nota
- * 4. El jefe selecciona: empleado, categoría (problema), y descripción
- * 5. crearCaso(): Valida datos y envía POST a /api/Casos/crear
- * 6. Backend guarda la nota y retorna confirmación
- * 
- * NOTAS IMPORTANTES:
- * - Solo jefes pueden crear notas (ven sus subordinados)
- * - Las categorías están hardcodeadas en el componente (podrían venir de API)
- * - El modelo CasoCreate debe coincidir exactamente con lo que espera el backend
+ * 1. Cargar dinámicamente las categorías desde el backend (/api/Categorias)
+ * 2. Mostrar lista de empleados subordinados del jefe autenticado
+ * 3. Permitir seleccionar un empleado, categoría y describir el problema
+ * 4. Enviar la nota al backend para guardarla
  */
 @Component({
   selector: 'app-senalar-problema',
@@ -36,138 +26,113 @@ import { CasosService } from '../../../services/casos.service';
 })
 export class SenalarProblemaComponent implements OnInit {
  
-  /**
-   * Lista de empleados subordinados del usuario autenticado
-   * Se obtiene del backend usando /api/Usuarios/jerarquia/{idUsuario}
-   * Estructura esperada: { idUsuario, nombreCompleto, correo, ... }
-   */
   empleados: any[] = [];
- 
-  /**
-   * Catálogo de categorías/tipos de incumplimiento disponibles
-   * Estas categorías se muestran en el dropdown para que el jefe seleccione
-   * TODO: Considerar traer esto del backend (/api/Categorias) en lugar de hardcodear
-   */
-  categorias: string[] = [
-    'Agresión Física',
-    'Baja Productividad',
-    'Comunicación y respeto',
-    'Desvío de rutas',
-    'Falsificación de Información, documentos y/o firmas',
-    'Falta de algún registro de asistencia',
-    'Falta de entrega y/o comprobación de viáticos',
-    'Falta de gestión de la herramienta de trabajo',
-    'Falta de gestión de usuarios',
-    'Faltas injustificadas',
-    'Incumplimiento de capacitación',
-    'Licencia vencida o extraviada',
-    'Mal uso de la herramienta de trabajo',
-    'Mala gestión de Uniformes',
-    'Mala Instalación',
-    'Multas de vialidad',
-    'Omisión al proceso de gestión del desempeño',
-    'Omisión de información para pago de variables',
-    'Omisión del control de los servicios vehiculares',
-    'Omisión en las actividades de su trabajo',
-    'Omisión o error en la asignación de dependencias',
-    'Omisión o error en la asignación de horarios',
-    'Otros',
-    'Positivo antidoping / Estado de ebriedad',
-    'PRO´s / Postventa',
-    'Retardos'
-  ];
- 
-  /**
-   * Modelo del caso que se está creando
-   * Debe coincidir exactamente con CasoCreate en el backend
-   * Propiedades:
-   * - idUsuarioAfectado: ID del empleado a quien va la nota
-   * - idCategoria: ID/índice de la categoría seleccionada
-   * - descripcion: Texto describiendo el problema
-   */
+  categorias: Categoria[] = [];
   nuevoCaso: CasoCreate = {
-    idUsuarioAfectado: 0,
+    idUsuario: 0,
     idCategoria: 0,
     descripcion: '',
     impacto: '',
     conducta: ''
   };
- 
+
   constructor(
     private usuariosService: UsuariosService,
-    private casosService: CasosService
+    private casosService: CasosService,
+    private categoriasService: CategoriasService
   ) {}
- 
-  /**
-   * Inicialización del componente
-   * - Obtiene el ID del usuario autenticado
-   * - Carga la lista de sus subordinados desde el backend
-   */
+
+  onColaboradorChange(event: any): void {
+    const valor = event.target.value;
+    console.log('👤 Colaborador raw:', valor, typeof valor);
+    const numValue = Number(valor);
+    console.log('👤 Colaborador convertido:', numValue, 'NaN?', isNaN(numValue));
+    if (!isNaN(numValue) && numValue > 0) {
+      this.nuevoCaso.idUsuario = numValue;
+    }
+  }
+
+  onCategoriaChange(event: any): void {
+    const valor = event.target.value;
+    console.log('📂 Categoría raw:', valor, typeof valor);
+    const numValue = Number(valor);
+    console.log('📂 Categoría convertido:', numValue, 'NaN?', isNaN(numValue));
+    if (!isNaN(numValue) && numValue > 0) {
+      this.nuevoCaso.idCategoria = numValue;
+    }
+  }
+
   ngOnInit(): void {
-    // Leer datos del usuario autenticado desde localStorage
-    // El token se decodificó en AppComponent y se guardó aquí
+    console.log('🚀 ngOnInit iniciado');
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
- 
     if (!usuario?.Id) {
       console.error('No se encontró el ID del usuario logueado');
       return;
     }
  
     const idUsuario = String(usuario.Id);
+    console.log('👤 ID Usuario:', idUsuario);
  
-    // Llamar al backend para obtener los subordinados de este jefe
+    this.categoriasService.obtenerCategorias().subscribe({
+      next: (data: Categoria[]) => {
+        this.categorias = data;
+        console.log('✅ Categorías cargadas:', this.categorias.length);
+        if (this.categorias.length > 0) {
+          console.log('🔍 CATEGORÍAS - Primera categoría COMPLETA:', this.categorias[0]);
+          console.log('🔍 🔍 🔍 CATEGORÍAS - PROPIEDADES:', Object.keys(this.categorias[0]));
+          console.log('🔍 CATEGORÍAS - Primera como JSON:', JSON.stringify(this.categorias[0]));
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar categorías:', err);
+      }
+    });
+
     this.usuariosService.obtenerJerarquia(idUsuario).subscribe({
       next: (data: any) => {
-        // Backend retorna { resultados: [...empleados...] }
-        console.log('📋 Respuesta completa de API:', data);
-        console.log('📋 Primer empleado:', data.resultados?.[0]);
-        
-        // Extraer array de empleados (o array vacío si no hay)
+        console.log('📋 Respuesta API:', data);
         this.empleados = data.resultados ?? [];
         console.log('✅ Empleados cargados:', this.empleados.length);
+        if (this.empleados.length > 0) {
+          console.log('🔍 EMPLEADOS - Primer empleado:', this.empleados[0]);
+          console.log('🔍 EMPLEADOS - Propiedades:', Object.keys(this.empleados[0]));
+          this.empleados.forEach((e, i) => {
+            console.log(`   [${i}] ${e.nombre_Completo} → id_emple_completo: ${e.id_emple_completo}, id_usuario: ${e.id_usuario}, id: ${e.id}`);
+          });
+        }
       },
       error: (err) => {
         console.error('❌ Error al cargar jerarquía:', err);
-        alert('Error al cargar jerarquía de empleados');
       }
     });
   }
- 
-  /**
-   * Crea un nuevo caso (nota disciplinaria)
-   * - Valida que todos los campos requeridos estén completos
-   * - Envía POST a /api/Casos/crear
-   * - Limpia el formulario si es exitoso
-   */
+
   crearCaso(): void {
-    // Validación de campos obligatorios
-    if (
-      !this.nuevoCaso.idUsuarioAfectado ||
-      !this.nuevoCaso.idCategoria ||
-      !this.nuevoCaso.descripcion.trim() ||
-      !this.nuevoCaso.impacto.trim() ||
-      !this.nuevoCaso.conducta.trim()
-    ) {
+    console.log('🔍 ANTES DE VALIDAR:');
+    console.log('  idUsuario:', this.nuevoCaso.idUsuario, typeof this.nuevoCaso.idUsuario);
+    console.log('  idCategoria:', this.nuevoCaso.idCategoria, typeof this.nuevoCaso.idCategoria);
+    console.log('  descripcion:', this.nuevoCaso.descripcion?.trim(), 'vacía?', !this.nuevoCaso.descripcion?.trim());
+    console.log('  impacto:', this.nuevoCaso.impacto?.trim(), 'vacía?', !this.nuevoCaso.impacto?.trim());
+    console.log('  conducta:', this.nuevoCaso.conducta?.trim(), 'vacía?', !this.nuevoCaso.conducta?.trim());
+
+    if (!this.nuevoCaso.idUsuario || !this.nuevoCaso.idCategoria || !this.nuevoCaso.descripcion?.trim() || 
+        !this.nuevoCaso.impacto?.trim() || !this.nuevoCaso.conducta?.trim()) {
       alert('Completa todos los campos obligatorios');
       return;
     }
- 
-    // Enviar al backend
+
+    console.log('📤 ENVIANDO:', this.nuevoCaso);
     this.casosService.crearCaso(this.nuevoCaso).subscribe({
-      next: () => {
+      next: (respuesta: any) => {
+        console.log('✅ Caso creado:', respuesta);
         alert('Caso creado correctamente');
-        // Limpiar formulario después de guardar
-        this.nuevoCaso = {
-          idUsuarioAfectado: 0,
-          idCategoria: 0,
-          descripcion: '',
-          impacto: '',
-          conducta: ''
-        };
+        this.nuevoCaso = { idUsuario: 0, idCategoria: 0, descripcion: '', impacto: '', conducta: '' };
       },
       error: (err) => {
-        console.error('❌ Error al crear caso:', err);
-        alert('Error al crear el caso');
+        console.error('❌ Error:', err);
+        console.error('Status:', err.status);
+        console.error('Error detalle:', err.error);
+        alert(`Error: ${err.error?.message || err.statusText}`);
       }
     });
   }

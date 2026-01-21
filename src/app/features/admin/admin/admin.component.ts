@@ -55,7 +55,7 @@ export class AdminComponent implements OnInit {
 
   // Formulario crear caso:
     nuevoCaso: CasoCreate = {
-    idUsuarioAfectado: 0,
+    idUsuario: 0,
     idCategoria: 0,
     descripcion: '',
     impacto: '',
@@ -177,9 +177,11 @@ export class AdminComponent implements OnInit {
   /** Crear caso (con tu servicio) */
   crearCaso(): void {
     if (
-      !this.nuevoCaso.idUsuarioAfectado ||
+      !this.nuevoCaso.idUsuario ||
       !this.nuevoCaso.idCategoria ||
-      !this.nuevoCaso.descripcion.trim()
+      !this.nuevoCaso.descripcion.trim() ||
+      !this.nuevoCaso.impacto.trim() ||
+      !this.nuevoCaso.conducta.trim()
     ) {
       alert('Completa todos los campos');
       return;
@@ -187,7 +189,7 @@ export class AdminComponent implements OnInit {
 
     this.casosService.crearCaso(this.nuevoCaso).subscribe({
       next: () => {
-        this.nuevoCaso = { idUsuarioAfectado: 0, idCategoria: 0, descripcion: '', impacto: '', conducta: '' };
+        this.nuevoCaso = { idUsuario: 0, idCategoria: 0, descripcion: '', impacto: '', conducta: '' };
         this.cargarCasos();
       },
       error: () => alert('Error al crear el caso')

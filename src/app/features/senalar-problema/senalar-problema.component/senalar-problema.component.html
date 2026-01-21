@@ -3,19 +3,19 @@
 
   <!-- Colaborador -->
   <label>Colaborador:</label>
-  <select [(ngModel)]="nuevoCaso.idUsuarioAfectado">
-    <option value="0">Seleccione un colaborador</option>
-    <option *ngFor="let e of this.empleados" [value]="e.id_usuario">
+  <select (change)="onColaboradorChange($event)">
+    <option value="">Seleccione un colaborador</option>
+    <option *ngFor="let e of empleados" [value]="e.id">
       {{ e.nombre_Completo }}
     </option>
   </select>
 
   <!-- Categoría -->
   <label>Categoría:</label>
-  <select [(ngModel)]="nuevoCaso.idCategoria">
-    <option value="0">Seleccione una categoría</option>
-    <option *ngFor="let c of categorias; let i = index" [value]="i + 1">
-      {{ c }}
+  <select (change)="onCategoriaChange($event)">
+    <option value="">Seleccione una categoría</option>
+    <option *ngFor="let c of categorias" [value]="c.id_Categoria">
+      {{ c.nombre }}
     </option>
   </select>
 
@@ -23,18 +23,13 @@
   <label>Descripción del problema:</label>
   <textarea rows="4" [(ngModel)]="nuevoCaso.descripcion" placeholder="Describe la situación detectada"></textarea>
 
-  <!-- Fecha -->
-  <label>Fecha de detección:</label>
-  <input type="date" id="fecha" name="fecha">
-  
   <!-- Impacto -->
   <label>Impacto en la empresa:</label>
-  <textarea rows="4" [(ngModel)]="nuevoCaso.impacto" placeholder="Describe el Impacto en la empresa"></textarea>
-
+  <textarea rows="4" [(ngModel)]="nuevoCaso.impacto" placeholder="¿Cuál fue el impacto de esta conducta en la empresa?"></textarea>
 
   <!-- Conducta -->
   <label>Conducta observada:</label>
-  <textarea rows="4" [(ngModel)]="nuevoCaso.conducta" placeholder="Describe la conducta detectada"></textarea>
+  <textarea rows="4" [(ngModel)]="nuevoCaso.conducta" placeholder="Describe en detalle la conducta que observaste"></textarea>
 
   <button (click)="crearCaso()">Guardar</button>
 </div>

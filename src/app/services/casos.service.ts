@@ -36,11 +36,27 @@ export class CasosService {
 
   /**
    * Crea una nueva nota disciplinaria
-   * @param caso - Objeto con idUsuarioAfectado, idCategoria, descripción
+   * @param caso - Objeto con idUsuario, idCategoria, descripcion, impacto, conducta
    * @returns Observable con respuesta del servidor
+   * 
+   * IMPORTANTE: Convierte de camelCase (TypeScript) a PascalCase (.NET)
+   * Entrada: { idUsuario: 123, idCategoria: 5, descripcion: "...", impacto: "...", conducta: "..." }
+   * Envío: { IdUsuario: 123, IdCategoria: 5, Descripcion: "...", Impacto: "...", Conducta: "..." }
    */
   crearCaso(caso: CasoCreate): Observable<any> {
-    return this.http.post(`${this.apiUrl}/Casos/crear`, caso);
+    // Convertir propiedades a PascalCase para que .NET las reconozca
+    const casoPascalCase = {
+      IdUsuario: caso.idUsuario,
+      IdCategoria: caso.idCategoria,
+      Descripcion: caso.descripcion,
+      Impacto: caso.impacto,
+      Conducta: caso.conducta
+    };
+    
+    console.log('📤 Enviando (camelCase original):', caso);
+    console.log('📤 Enviando (PascalCase convertido):', casoPascalCase);
+    
+    return this.http.post(`${this.apiUrl}/Casos/crear`, casoPascalCase);
   }
 
   /**
