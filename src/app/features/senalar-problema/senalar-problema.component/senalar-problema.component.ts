@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
  
 import { CasoCreate } from '../../../models/caso-create.model';
 import { Categoria } from '../../../models/categoria.model';
@@ -8,6 +9,7 @@ import { UsuariosService } from '../../../services/usuarios.service';
 import { CasosService } from '../../../services/casos.service';
 import { CategoriasService } from '../../../services/categorias.service';
 import { AuthService } from '../../../services/auth.service';
+import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/navigation-buttons.component';
 
 /**
  * SENALARPROBLEMACOMPONENT - Formulario principal para crear notas disciplinarias
@@ -21,7 +23,7 @@ import { AuthService } from '../../../services/auth.service';
 @Component({
   selector: 'app-senalar-problema',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavigationButtonsComponent],
   templateUrl: './senalar-problema.component.html',
   styleUrls: ['./senalar-problema.component.scss']
 })
@@ -35,34 +37,28 @@ export class SenalarProblemaComponent implements OnInit {
     descripcion: '',
     impacto: '',
     conducta: '',
-    estatus: 1  // Por defecto 1 = Activo
+    estatus: 1,  // Por defecto 1 = Activo
+    idPaso: 1    // Por defecto 1 = Primer paso (Señalar Problema)
   };
 
   constructor(
     private usuariosService: UsuariosService,
     private casosService: CasosService,
     private categoriasService: CategoriasService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
-  onColaboradorChange(event: any): void {
-    const valor = event.target.value;
-    console.log('👤 Colaborador raw:', valor, typeof valor);
-    const numValue = Number(valor);
-    console.log('👤 Colaborador convertido:', numValue, 'NaN?', isNaN(numValue));
-    if (!isNaN(numValue) && numValue > 0) {
-      this.nuevoCaso.idUsuario = numValue;
-    }
+  compareNumbers(o1: any, o2: any): boolean {
+    return o1 === o2;
   }
 
-  onCategoriaChange(event: any): void {
-    const valor = event.target.value;
-    console.log('📂 Categoría raw:', valor, typeof valor);
-    const numValue = Number(valor);
-    console.log('📂 Categoría convertido:', numValue, 'NaN?', isNaN(numValue));
-    if (!isNaN(numValue) && numValue > 0) {
-      this.nuevoCaso.idCategoria = numValue;
-    }
+  getCategoriaId(categoria: any): number {
+    return categoria.id_Categoria || categoria.Id_Categoria || categoria.idCategoria || 0;
+  }
+
+  regresarAlInicio(): void {
+    this.router.navigate(['/login']);
   }
 
   ngOnInit(): void {
@@ -96,8 +92,9 @@ export class SenalarProblemaComponent implements OnInit {
         console.log('✅ Categorías cargadas:', this.categorias.length);
         if (this.categorias.length > 0) {
           console.log('🔍 CATEGORÍAS - Primera categoría COMPLETA:', this.categorias[0]);
-          console.log('🔍 🔍 🔍 CATEGORÍAS - PROPIEDADES:', Object.keys(this.categorias[0]));
+          console.log('🔍 CATEGORÍAS - PROPIEDADES:', Object.keys(this.categorias[0]));
           console.log('🔍 CATEGORÍAS - Primera como JSON:', JSON.stringify(this.categorias[0]));
+          console.log('🔍 CATEGORÍAS - Todas las primeras 3:', this.categorias.slice(0, 3));
         }
       },
       error: (err) => {
@@ -139,18 +136,49 @@ export class SenalarProblemaComponent implements OnInit {
       return;
     }
 
+    // Verificar que la categoría existe
+    const categoriaExiste = this.categorias.find(c => {
+      const id = c.id_Categoria || (c as any).Id_Categoria || (c as any).idCategoria;
+      return id === this.nuevoCaso.idCategoria;
+    });
+    
+    if (!categoriaExiste) {
+      alert(`Error: La categoría con ID ${this.nuevoCaso.idCategoria} no existe. Selecciona una categoría válida.`);
+      console.error('❌ Categoría no encontrada. Buscando ID:', this.nuevoCaso.idCategoria);
+      console.error('❌ Categorías disponibles:', this.categorias);
+      return;
+    }
+
+    // FORZAR id_paso a 1 (siempre inicia en paso 1 de 6)
+    this.nuevoCaso.idPaso = 1;
+    
+    // FORZAR id_paso a 1 (siempre inicia en paso 1 de 6)
+    this.nuevoCaso.idPaso = 1;
+    
     console.log('📤 ENVIANDO CASO COMPLETO:', this.nuevoCaso);
+    console.log('✅ Categoría verificada:', categoriaExiste.nombre);
+    console.log('✅ idPaso FORZADO a 1:', this.nuevoCaso.idPaso);
+    console.log('✅ idPaso FORZADO a 1:', this.nuevoCaso.idPaso);
+    
     this.casosService.crearCaso(this.nuevoCaso).subscribe({
       next: (respuesta: any) => {
         console.log('✅ Caso creado:', respuesta);
         alert('Caso creado correctamente');
-        this.nuevoCaso = { idUsuario: 0, idCategoria: 0, descripcion: '', impacto: '', conducta: '' };
+        this.nuevoCaso = { 
+          idUsuario: 0, 
+          idCategoria: 0, 
+          descripcion: '', 
+          impacto: '', 
+          conducta: '',
+          idUsuarioJefe: this.nuevoCaso.idUsuarioJefe,
+          estatus: 1
+        };
       },
       error: (err) => {
         console.error('❌ Error:', err);
         console.error('Status:', err.status);
         console.error('Error detalle:', err.error);
-        alert(`Error: ${err.error?.message || err.statusText}`);
+        alert(`Error al crear el caso: ${err.error?.message || err.statusText || 'Error desconocido'}`);
       }
     });
   }

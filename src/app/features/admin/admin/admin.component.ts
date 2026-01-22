@@ -6,6 +6,7 @@ import { CasoCreate } from '../../../models/caso-create.model';
 import { CasosService } from '../../../services/casos.service';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { AuthService } from '../../../services/auth.service';
+import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/navigation-buttons.component';
 
 type EstadoPaso =
   | 'SENALAR_PROBLEMA'
@@ -35,7 +36,7 @@ interface CasoUI {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavigationButtonsComponent],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']
 })

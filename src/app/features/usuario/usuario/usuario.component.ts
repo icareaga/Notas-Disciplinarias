@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { CasosService } from "../../../services/casos.service";
 import { AuthService } from "../../../services/auth.service";
+import { NavigationButtonsComponent } from "../../../shared/navigation-buttons/navigation-buttons.component";
 
 type EstadoPaso = 'senalar_problema' | 'determinar_causa' | 'plan_accion' | 'evaluar_resultados' | 'nota_incumplimiento' | 'acta_administrativa';
 
@@ -21,7 +22,7 @@ interface CasoUsuario {
 @Component({
   selector: 'app-usuario',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, NavigationButtonsComponent],
   templateUrl: './usuario.component.html',
   styleUrls: ['./usuario.component.scss']
 })

@@ -1,20 +1,23 @@
-<div class="card">
-  <h2>1. Señalar el Problema</h2>
+<div class="page-container">
+  <app-navigation-buttons></app-navigation-buttons>
+  
+  <div class="card">
+    <h2>1. Señalar el Problema</h2>
 
   <!-- Colaborador -->
   <label>Colaborador:</label>
-  <select (change)="onColaboradorChange($event)">
-    <option value="">Seleccione un colaborador</option>
-    <option *ngFor="let e of empleados" [value]="e.id">
+  <select [(ngModel)]="nuevoCaso.idUsuario" [compareWith]="compareNumbers">
+    <option [ngValue]="0">Seleccione un colaborador</option>
+    <option *ngFor="let e of empleados" [ngValue]="e.id">
       {{ e.nombre_Completo }}
     </option>
   </select>
 
   <!-- Categoría -->
   <label>Categoría:</label>
-  <select (change)="onCategoriaChange($event)">
-    <option value="">Seleccione una categoría</option>
-    <option *ngFor="let c of categorias" [value]="c.id_Categoria">
+  <select [(ngModel)]="nuevoCaso.idCategoria" [compareWith]="compareNumbers">
+    <option [ngValue]="0">Seleccione una categoría</option>
+    <option *ngFor="let c of categorias" [ngValue]="getCategoriaId(c)">
       {{ c.nombre }}
     </option>
   </select>
@@ -32,4 +35,5 @@
   <textarea rows="4" [(ngModel)]="nuevoCaso.conducta" placeholder="Describe en detalle la conducta que observaste"></textarea>
 
   <button (click)="crearCaso()">Guardar</button>
+  </div>
 </div>

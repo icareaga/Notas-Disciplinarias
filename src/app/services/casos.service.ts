@@ -44,15 +44,16 @@ export class CasosService {
    * Envío: { IdUsuario: 123, IdCategoria: 5, Descripcion: "...", Impacto: "...", Conducta: "..." }
    */
   crearCaso(caso: CasoCreate): Observable<any> {
-    // Convertir propiedades a PascalCase para que .NET las reconozca
+    // Enviar con los nombres exactos que espera el DTO del backend
     const casoApi = {
       IdUsuario: caso.idUsuario,
-      IdCategoria: caso.idCategoria,
-      Descripcion: caso.descripcion,
-      Impacto: caso.impacto,
-      Conducta: caso.conducta,
-      id_usuario_jefe: caso.idUsuarioJefe, // Enviar en snake_case para el backend
-      Estatus: caso.estatus ?? 1 // Por defecto 1 = Activo
+      id_categoria: caso.idCategoria, // ✅ snake_case por JsonPropertyName
+      descripcion: caso.descripcion,  // ✅ minúscula por JsonPropertyName
+      impacto: caso.impacto,          // ✅ minúscula por JsonPropertyName
+      conducta: caso.conducta,        // ✅ minúscula por JsonPropertyName
+      id_usuario_jefe: caso.idUsuarioJefe ?? 0,
+      estatus: caso.estatus ?? 1,
+      id_paso: 1 // SIEMPRE 1: Primer paso de 6 pasos
     };
     
     console.log('📤 Enviando (camelCase original):', caso);

@@ -5,14 +5,60 @@ $light-bg: #f4f6f9;
 .header {
   background: $megacable-blue;
   color: white;
-  padding: 16px;
-  font-size: 18px;
-  font-weight: bold;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .logo {
-  margin: 0 auto;
-  max-width: 1200px;
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 6px;
+  display: block;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-weight: 500;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  }
 }
 
 .content {

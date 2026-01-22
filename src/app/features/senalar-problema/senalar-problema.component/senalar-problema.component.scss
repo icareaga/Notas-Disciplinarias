@@ -1,5 +1,11 @@
 $megacable-blue: #0047bb;
 
+.page-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
 .card {
   max-width: 600px;
   margin: 40px auto;

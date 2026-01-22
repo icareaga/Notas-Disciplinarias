@@ -31,7 +31,16 @@ import { AuthService } from './services/auth.service';
   imports: [RouterOutlet],
   template: `
     <header class="header">
-      <div class="logo">📘 Notas Disciplinarias</div>
+      <div class="header-content">
+        <img src="assets/logo_megacable.png" alt="Megacable" class="logo" />
+        <h1 class="titulo">Notas Disciplinarias</h1>
+      </div>
+      <button class="btn-logout" (click)="cerrarSesion()" title="Cerrar sesión">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H15M10 17L15 12M15 12L10 7M15 12H3" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Cerrar Sesión</span>
+      </button>
     </header>
 
     <main class="content">
@@ -95,5 +104,14 @@ export class AppComponent implements OnInit {
         this.router.navigate(['/login'], { queryParams: {} });
       }
     }
+  }
+
+  cerrarSesion(): void {
+    // Limpiar localStorage/sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Redirigir a MIRH ITGOV
+    window.location.href = 'https://mirh.megacorp.com.mx:84/ITGovApp/Login/Index';
   }
 }
