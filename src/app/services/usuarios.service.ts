@@ -24,6 +24,14 @@ export class UsuariosService {
   constructor(private http: HttpClient) {}
 
   /**
+   * Obtiene todos los usuarios del sistema (empleados y jefes)
+   * @returns Observable con array de usuarios
+   */
+  obtenerTodos() {
+    return this.http.get<any[]>(`${this.apiUrl}/todos`);
+  }
+
+  /**
    * Obtiene los empleados subordinados de un usuario jefe
    * @param plazaRaiz - ID del usuario jefe
    * @returns Observable con { resultados: Array de empleados }

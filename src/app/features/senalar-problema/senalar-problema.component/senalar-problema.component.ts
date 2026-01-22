@@ -7,6 +7,7 @@ import { Categoria } from '../../../models/categoria.model';
 import { UsuariosService } from '../../../services/usuarios.service';
 import { CasosService } from '../../../services/casos.service';
 import { CategoriasService } from '../../../services/categorias.service';
+import { AuthService } from '../../../services/auth.service';
 
 /**
  * SENALARPROBLEMACOMPONENT - Formulario principal para crear notas disciplinarias
@@ -33,13 +34,15 @@ export class SenalarProblemaComponent implements OnInit {
     idCategoria: 0,
     descripcion: '',
     impacto: '',
-    conducta: ''
+    conducta: '',
+    estatus: 1  // Por defecto 1 = Activo
   };
 
   constructor(
     private usuariosService: UsuariosService,
     private casosService: CasosService,
-    private categoriasService: CategoriasService
+    private categoriasService: CategoriasService,
+    private authService: AuthService
   ) {}
 
   onColaboradorChange(event: any): void {
@@ -64,14 +67,28 @@ export class SenalarProblemaComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('🚀 ngOnInit iniciado');
-    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-    if (!usuario?.Id) {
-      console.error('No se encontró el ID del usuario logueado');
+    
+    // Obtener el ID del jefe desde el token
+    const tokenInfo = this.authService.getTokenInfo();
+    console.log('🔐 Token Info completo:', tokenInfo);
+    console.log('🔐 Propiedades del token:', tokenInfo ? Object.keys(tokenInfo) : 'sin token');
+    
+    // Intentar múltiples variantes de campo ID
+    const idJefe = tokenInfo?.Id || 
+                   tokenInfo?.UserId || 
+                   (tokenInfo as any)?.['id'] || 
+                   (tokenInfo as any)?.['userId'] ||
+                   (tokenInfo as any)?.[Object.keys(tokenInfo || {})[0]];  // Tomar el primer valor si nada coincide
+    
+    if (!idJefe) {
+      console.error('❌ No se encontró el ID del jefe en el token');
       return;
     }
- 
-    const idUsuario = String(usuario.Id);
-    console.log('👤 ID Usuario:', idUsuario);
+    
+    this.nuevoCaso.idUsuarioJefe = Number(idJefe);  // Guardar el jefe que crea el caso
+    console.log('👤 ID del Jefe que crea el caso:', idJefe, 'tipo:', typeof idJefe);
+    
+    const idUsuario = String(idJefe);
  
     this.categoriasService.obtenerCategorias().subscribe({
       next: (data: Categoria[]) => {
@@ -111,6 +128,7 @@ export class SenalarProblemaComponent implements OnInit {
     console.log('🔍 ANTES DE VALIDAR:');
     console.log('  idUsuario:', this.nuevoCaso.idUsuario, typeof this.nuevoCaso.idUsuario);
     console.log('  idCategoria:', this.nuevoCaso.idCategoria, typeof this.nuevoCaso.idCategoria);
+    console.log('  idUsuarioJefe:', this.nuevoCaso.idUsuarioJefe, typeof this.nuevoCaso.idUsuarioJefe);
     console.log('  descripcion:', this.nuevoCaso.descripcion?.trim(), 'vacía?', !this.nuevoCaso.descripcion?.trim());
     console.log('  impacto:', this.nuevoCaso.impacto?.trim(), 'vacía?', !this.nuevoCaso.impacto?.trim());
     console.log('  conducta:', this.nuevoCaso.conducta?.trim(), 'vacía?', !this.nuevoCaso.conducta?.trim());
@@ -121,7 +139,7 @@ export class SenalarProblemaComponent implements OnInit {
       return;
     }
 
-    console.log('📤 ENVIANDO:', this.nuevoCaso);
+    console.log('📤 ENVIANDO CASO COMPLETO:', this.nuevoCaso);
     this.casosService.crearCaso(this.nuevoCaso).subscribe({
       next: (respuesta: any) => {
         console.log('✅ Caso creado:', respuesta);

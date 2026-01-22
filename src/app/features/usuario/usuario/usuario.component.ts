@@ -1,79 +1,114 @@
-import { CommonModule } from "@angular/common";
+import { CommonModule, DatePipe } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { CasosService } from "../../../services/casos.service";
+import { AuthService } from "../../../services/auth.service";
+
+type EstadoPaso = 'senalar_problema' | 'determinar_causa' | 'plan_accion' | 'evaluar_resultados' | 'nota_incumplimiento' | 'acta_administrativa';
 
 interface CasoUsuario {
   id: number;
   motivo: string;
-  descripcion: string;
-  pasoActual: string;
-  fechaCreacion: string;
-  estado: string;  // En proceso, Completado, Detenido
+  pasoActual: number;
+  pasoActualTexto: string;
+  fecha: string | Date;
+  estado: EstadoPaso;
+  estatusCaso?: number;  // 1 = Activo, 0 = Cerrado
+  descripcion?: string;
+  impacto?: string;
+  conducta?: string;
 }
 
 @Component({
   selector: 'app-usuario',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DatePipe],
   templateUrl: './usuario.component.html',
   styleUrls: ['./usuario.component.scss']
 })
 
 export class UsuarioComponent implements OnInit {
 
-  // 🔹 Catálogo de pasos reales del proceso
-  pasos = [
-    'Señalar Problema',
-    'Determinar Causa',
-    'Plan de Acción',
-    'Evaluar Resultados',
-    'Nota de Incumplimiento',
-    'Acta Administrativa'
-  ];
+  casos: CasoUsuario[] = [];
+  mostrarModal = false;
+  casoSeleccionado: CasoUsuario | null = null;
 
-  // 🔹 Caso asignado
-  caso: CasoUsuario | null = null;
-
-  // 🔹 Historial de casos anteriores
-  historialCasos: CasoUsuario[] = [];
-
-  constructor(private casosService: CasosService) {}
+  constructor(
+    private casosService: CasosService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    const idUsuario = 1; // TODO: Obtener del login/auth
-    this.casosService.obtenerCasosPorUsuario(idUsuario).subscribe({
+    this.cargarCasos();
+  }
+
+  cargarCasos(): void {
+    const tokenInfo = this.authService.getTokenInfo();
+    const usuarioId = tokenInfo?.Id || tokenInfo?.UserId;
+
+    if (!usuarioId) {
+      console.error('No se pudo obtener el ID del usuario');
+      return;
+    }
+
+    this.casosService.obtenerCasosPorUsuario(Number(usuarioId)).subscribe({
       next: (casos: any[]) => {
-        if (casos.length > 0) {
-          // Asumir el caso actual es el primero con estado 'En proceso'
-          const casoActual = casos.find(c => c.estado === 'En proceso') || casos[0];
-          this.caso = {
-            id: casoActual.id,
-            motivo: casoActual.motivo,
-            descripcion: casoActual.descripcion,
-            pasoActual: casoActual.estado === 'En proceso' ? 'Evaluar Resultados' : 'Completado', // Lógica simple
-            fechaCreacion: new Date(casoActual.fechaCreacion).toLocaleDateString(),
-            estado: casoActual.estado
-          };
-          // Historial: los demás casos
-          this.historialCasos = casos.filter(c => c.id !== casoActual.id).map(c => ({
-            id: c.id,
-            motivo: c.motivo,
-            descripcion: c.descripcion,
-            pasoActual: c.estado, // Para historial, usar estado como pasoActual
-            fechaCreacion: new Date(c.fechaCreacion).toLocaleDateString(),
-            estado: c.estado
-          }));
-        }
+        this.casos = casos.map(c => this.mapearCaso(c));
       },
       error: (err) => {
-        console.error('Error al obtener casos:', err);
-        // Mantener datos simulados o mostrar error
+        console.error('Error al cargar casos:', err);
       }
     });
   }
 
-  // Validar si un paso es el actual
-  esPasoActual(paso: string): boolean {
-    return this.caso ? paso === this.caso.pasoActual : false;
+  mapearCaso(c: any): CasoUsuario {
+    const pasoActual = c.estatus || 1;
+    const estado = this.estadoPorPaso(pasoActual);
+    
+    return {
+      id: c.id_caso,
+      motivo: c.categoria || 'Sin categoría',
+      pasoActual,
+      pasoActualTexto: this.etiquetaPaso(estado),
+      fecha: c.fecha_registro || new Date(),
+      estado,
+      estatusCaso: c.estatus || 1,
+      descripcion: c.descripcion,
+      impacto: c.impacto,
+      conducta: c.conducta
+    };
+  }
+
+  estadoPorPaso(paso: number): EstadoPaso {
+    const mapa: Record<number, EstadoPaso> = {
+      1: 'senalar_problema',
+      2: 'determinar_causa',
+      3: 'plan_accion',
+      4: 'evaluar_resultados',
+      5: 'nota_incumplimiento',
+      6: 'acta_administrativa'
+    };
+    return mapa[paso] || 'senalar_problema';
+  }
+
+  etiquetaPaso(paso: EstadoPaso): string {
+    const etiquetas: Record<EstadoPaso, string> = {
+      senalar_problema: 'Señalar Problema',
+      determinar_causa: 'Determinar Causa',
+      plan_accion: 'Plan de Acción',
+      evaluar_resultados: 'Evaluar Resultados',
+      nota_incumplimiento: 'Nota Incumplimiento',
+      acta_administrativa: 'Acta Administrativa'
+    };
+    return etiquetas[paso] || 'Desconocido';
+  }
+
+  verCaso(caso: CasoUsuario): void {
+    this.casoSeleccionado = caso;
+    this.mostrarModal = true;
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+    this.casoSeleccionado = null;
   }
 }

@@ -154,6 +154,11 @@ export class LoginComponent implements OnInit {
     this.router.navigate(['/senalar-problema']);
   }
 
+  verCasosActivos() {
+    console.log('📋 Ver casos activos (Admin)...');
+    this.router.navigate(['/admin']);
+  }
+
   isAdmin(): boolean {
     return this.usuarioData?.Rol?.toLowerCase() === 'admin';
   }

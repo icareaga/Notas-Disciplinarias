@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 
 import { CasoCreate } from '../../../models/caso-create.model';
 import { CasosService } from '../../../services/casos.service';
+import { UsuariosService } from '../../../services/usuarios.service';
+import { AuthService } from '../../../services/auth.service';
 
 type EstadoPaso =
   | 'SENALAR_PROBLEMA'
@@ -14,15 +16,20 @@ type EstadoPaso =
   | 'ACTA_ADMINISTRATIVA';
 
 interface CasoUI {
-  id: number;
-  empleado: string;
-  motivo: string;
-  levantadoPor: string;
-  pasoActual: string;       // Texto visible del paso
-  estado: EstadoPaso;       // Clave de filtro
-  estadoEtiqueta: string;   // Texto visible del estado
+  idEmpleado?: number;      // id del usuario afectado
+  idUsuarioJefe?: number;   // id del jefe que creó el caso
+  id: number;               // id_caso
+  empleado: string;         // nombre del empleado afectado
+  motivo: string;           // categoría
+  levantadoPor: string;     // nombre del jefe que lo levantó
+  pasoActual: number;       // 1 al 6 (estatus)
+  pasoActualTexto: string;  // nombre del paso
   fecha: string | Date;
-  // cualquier campo extra que necesites...
+  estado: EstadoPaso;       // interno para filtros/badges
+  descripcion?: string;     // descripción del caso
+  impacto?: string;         // impacto del caso
+  conducta?: string;        // conducta observada
+  estatusCaso?: number;     // 1 = Activo, 0 = Cerrado
 }
 
 @Component({
@@ -62,44 +69,129 @@ export class AdminComponent implements OnInit {
     conducta: ''
   };
 
-  constructor(private casosService: CasosService) {}
+  // Modal
+  mostrarModal = false;
+  casoSeleccionado: CasoUI | null = null;
+
+  constructor(
+    private casosService: CasosService,
+    private usuariosService: UsuariosService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    console.log('🚀 AdminComponent iniciado');
     this.cargarCasos();
   }
 
   /** Carga desde servicio y normaliza al modelo de UI */
   cargarCasos(): void {
-    this.casosService.obtenerCasos().subscribe({
+    console.log('📂 Cargando casos del admin...');
+    
+    // Obtener ID del jefe del token
+    const info = this.authService.getTokenInfo();
+    const jefeId = info?.Id || info?.UserId;
+    console.log('👤 ID del jefe:', jefeId);
+    
+    // Llamar al servicio con el ID del jefe
+    this.casosService.obtenerCasos(Number(jefeId)).subscribe({
       next: (data: any[]) => {
+        console.log('✅ Casos obtenidos del backend:', data);
         // Mapea los campos reales del backend a CasoUI:
         this.casos = data.map(item => this.mapearCaso(item));
+        console.log('✅ Casos mapeados:', this.casos);
         this.actualizarConteos();
         this.aplicarFiltros();
+        console.log('📊 Conteos actualizados:', this.conteos);
+        
+        // Cargar nombres de empleados
+        this.enriquecerConNombresUsuarios();
       },
-      error: () => alert('Error al cargar casos')
+      error: (err) => {
+        console.error('❌ Error al cargar casos:', err);
+        alert('Error al cargar casos: ' + err.status + ' - ' + err.statusText);
+      }
     });
+  }
+
+  /** Intenta obtener nombres de usuarios para enriquecer los datos */
+  private enriquecerConNombresUsuarios(): void {
+    const info = this.authService.getTokenInfo();
+    const jefeId = info?.Id || info?.UserId;
+    
+    if (!jefeId) {
+      console.warn('⚠️ No se encontró Id de jefe en el token');
+      return;
+    }
+
+    // Obtener el nombre del jefe actual desde el token
+    const nombreJefeActual = 
+      (info as any)?.Nombre_Completo || 
+      (info as any)?.nombreCompleto ||
+      (info as any)?.Nombre || 
+      (info as any)?.nombre ||
+      'Admin';
+
+    console.log('👤 Jefe actual:', { jefeId, nombreJefeActual });
+
+    // Solo actualizamos el nombre del jefe en "Levantado por"
+    // El nombre del empleado ya viene del backend
+    this.casos = this.casos.map(c => ({
+      ...c,
+      levantadoPor: nombreJefeActual
+    }));
+    
+    console.log('✅ Casos actualizados con nombre del jefe:', this.casos);
+    this.aplicarFiltros();
   }
 
   /** Ajusta el caso a la forma necesaria en interfaz */
   private mapearCaso(item: any): CasoUI {
-    const estado = this.mapEstatusToEstado(item.Estatus);
+    const estatus = item.Estatus || item.estatus || 1;
+    const estado = this.mapEstatusToEstado(estatus);
+    const pasoActual = Number(estatus) || 1;
+
+    // El backend devuelve snake_case, PascalCase o camelCase: cubrimos todos
+    const idCaso = item.id_caso || item.IdCaso || item.idCaso || item.id;
+    const idUsuario = item.id_usuario || item.IdUsuario || item.idUsuario;
+    const idUsuarioJefe = item.id_usuario_jefe || item.IdUsuarioJefe || item.idUsuarioJefe;
+    const categoria = item.categoria || item.Categoria || 'Sin categoría';
+    const fechaRegistro = item.fecha_registro || item.FechaRegistro || item.fechaRegistro;
+    const descripcion = item.descripcion || item.Descripcion || '';
+    const impacto = item.impacto || item.Impacto || '';
+    const conducta = item.conducta || item.Conducta || '';
+    
+    // Nombre del empleado afectado - ahora viene directo del backend con JOIN
+    const nombreEmpleadoAfectado = 
+      item.nombre_empleado || 
+      item.nombreEmpleado ||
+      item.NombreEmpleado ||
+      `Usuario ${idUsuario ?? 'desconocido'}`;
+
+    console.log(`🔍 Mapeando caso: id=${idCaso}, idUsuario=${idUsuario}, idUsuarioJefe=${idUsuarioJefe}, nombreEmpleado=${nombreEmpleadoAfectado}`);
 
     return {
-      id: item.IdCaso,
-      empleado: item.Empleado,
-      motivo: item.Categoria,
-      levantadoPor: 'Admin', // Placeholder, ajusta si tienes el campo
-      pasoActual: this.etiquetaPaso(estado),
+      idEmpleado: idUsuario,
+      idUsuarioJefe: idUsuarioJefe ? Number(idUsuarioJefe) : undefined,
+      id: idCaso,
+      empleado: nombreEmpleadoAfectado,
+      motivo: categoria,
+      levantadoPor: 'Cargando...', // Se actualizará en enriquecerConNombresUsuarios
+      pasoActual,
+      pasoActualTexto: this.etiquetaPaso(estado),
+      fecha: fechaRegistro || new Date(),
       estado,
-      estadoEtiqueta: this.etiquetaEstado(estado),
-      fecha: item.FechaRegistro
+      descripcion,
+      impacto,
+      conducta,
+      estatusCaso: estatus
     };
   }
 
   /** Mapea Estatus del API a EstadoPaso */
-  private mapEstatusToEstado(estatus: string): EstadoPaso {
-    switch (estatus) {
+  private mapEstatusToEstado(estatus: string | number): EstadoPaso {
+    const status = String(estatus);
+    switch (status) {
       case '1': return 'SENALAR_PROBLEMA';
       case '2': return 'DETERMINAR_CAUSA';
       case '3': return 'PLAN_ACCION';
@@ -213,16 +305,32 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  /** Ver detalle del caso en modal */
+  verCaso(caso: CasoUI): void {
+    this.casoSeleccionado = caso;
+    this.mostrarModal = true;
+  }
+
+  /** Cerrar modal */
+  cerrarModal(): void {
+    this.mostrarModal = false;
+    this.casoSeleccionado = null;
+  }
+
+  /** Editar caso */
+  editarCaso(caso: CasoUI): void {
+    alert(`Editar caso #${caso.id}\n\nEsta funcionalidad se implementará para permitir modificar el caso.`);
+  }
+
   /** Exporta tabla a Excel (CSV sencillo) */
   exportarExcel(): void {
-    const encabezados = ['ID','Empleado','Motivo','Levantado Por','Paso Actual','Estado','Fecha'];
+    const encabezados = ['ID','Empleado','Motivo','Levantado Por','Paso Actual','Fecha'];
     const filas = this.casosFiltrados.map(c => [
       c.id,
       c.empleado,
       c.motivo,
       c.levantadoPor,
-      c.pasoActual,
-      c.estadoEtiqueta,
+      c.pasoActualTexto,
       typeof c.fecha === 'string' ? c.fecha : (c.fecha as Date).toISOString().slice(0, 10)
     ]);
 

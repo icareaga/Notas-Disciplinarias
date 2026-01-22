@@ -1,149 +1,286 @@
 .usuario-container {
   padding: 20px;
-  max-width: 800px;
-  margin: auto;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 15px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.card {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+.titulo {
+  font-size: 26px;
+  font-weight: bold;
+  color: #0a47a1;
   margin-bottom: 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  .emoji {
+    margin-right: 8px;
+  }
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0px 6px 15px rgba(0,0,0,0.15);
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+
+  th {
+    background: #0056b3;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+    
+    &.col-id { width: 80px; }
+    &.col-motivo { width: 25%; }
+    &.col-paso { width: 25%; }
+    &.col-estatus { width: 15%; }
+    &.col-fecha { width: 12%; }
+    &.col-acciones { width: 10%; }
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+    
+    &.col-id { 
+      background: #f0f5ff;
+      font-weight: bold;
+      color: #0056b3;
+      text-align: center;
+    }
+  }
+
+  tr:hover {
+    background: #f9f9f9;
+  }
 }
 
 .badge {
-  padding: 5px 10px;
-  border-radius: 6px;
-  color: white;
-  font-weight: bold;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
+
+  &.badge-senalar_problema {
+    background: #cfe2ff;
+    color: #084298;
+  }
+
+  &.badge-determinar_causa {
+    background: #e7d4f5;
+    color: #5a0d7a;
+  }
+
+  &.badge-plan_accion {
+    background: #cfe2ff;
+    color: #084298;
+  }
+
+  &.badge-evaluar_resultados {
+    background: #d1e7dd;
+    color: #0f5132;
+  }
+
+  &.badge-nota_incumplimiento {
+    background: #f8d7da;
+    color: #842029;
+  }
+
+  &.badge-acta_administrativa {
+    background: #fff3cd;
+    color: #664d03;
+  }
+}
+
+.badge-estatus {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 15px;
   font-size: 12px;
+  font-weight: 600;
 
-  &.En\ proceso {
-    background: linear-gradient(45deg, #007bff, #0056b3);
+  &.activo {
+    background: #d1e7dd;
+    color: #0f5132;
   }
 
-  &.Completado {
-    background: linear-gradient(45deg, #28a745, #1e7e34);
-  }
-
-  &.Detenido {
-    background: linear-gradient(45deg, #dc3545, #bd2130);
-  }
-}
-
-.pasos-lista {
-  list-style: none;
-  padding: 0;
-  counter-reset: step-counter;
-
-  li {
-    background: #f8f9fa;
-    padding: 12px 15px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    position: relative;
-    border-left: 3px solid #dee2e6;
-    transition: all 0.3s ease;
-
-    &::before {
-      counter-increment: step-counter;
-      content: counter(step-counter);
-      position: absolute;
-      left: -15px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #6c757d;
-      color: white;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    &.activo {
-      background: linear-gradient(45deg, #005BBB, #003F8A);
-      color: white;
-      font-weight: bold;
-      border-left-color: #003F8A;
-      transform: translateX(5px);
-
-      &::before {
-        background: #fff;
-        color: #005BBB;
-      }
-    }
+  &.cerrado {
+    background: #f8d7da;
+    color: #842029;
   }
 }
 
-.btn-detalle {
-  width: 100%;
-  padding: 12px;
-  background: #005BBB;
-  color: white;
+.btn {
+  padding: 6px 12px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  margin-top: 20px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  svg {
+    vertical-align: middle;
+  }
+
+  &.btn-ver {
+    background: #17a2b8;
+    color: white;
+
+    &:hover {
+      background: #138496;
+      transform: translateY(-1px);
+    }
+  }
+
+  &.btn-secondary {
+    background: #6c757d;
+    color: white;
+
+    &:hover {
+      background: #5a6268;
+    }
+  }
 }
 
-.btn-detalle:hover {
-  background: #004499;
+.no-casos {
+  text-align: center;
+  padding: 40px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #6c757d;
+  font-size: 16px;
 }
 
-.historial-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 15px;
+// Estilos del Modal
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
 }
 
-.historial-card {
-  padding: 15px;
-  margin-bottom: 0;
-  border-left: 4px solid #005BBB;
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
 }
 
-.historial-header {
+.modal-header {
+  background: linear-gradient(135deg, #0a47a1, #1565c0);
+  color: white;
+  padding: 20px 25px;
+  border-radius: 12px 12px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    color: white;
+  }
+
+  .btn-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
 }
 
-.historial-id {
-  font-weight: bold;
-  color: #005BBB;
+.modal-body {
+  padding: 25px;
 }
 
-.badge.small {
-  font-size: 12px;
-  padding: 3px 8px;
+.detalle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 20px;
 }
 
-.historial-descripcion {
-  font-size: 14px;
-  color: #666;
-  margin-top: 8px;
+.detalle-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-weight: 700;
+    color: #0a47a1;
+    font-size: 14px;
+  }
+
+  p {
+    margin: 0;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .texto-largo {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    min-height: 60px;
+  }
 }
 
-.no-historial {
-  text-align: center;
-  color: #888;
-  font-style: italic;
-  padding: 20px;
+.modal-footer {
+  padding: 15px 25px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

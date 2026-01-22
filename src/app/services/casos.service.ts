@@ -45,36 +45,41 @@ export class CasosService {
    */
   crearCaso(caso: CasoCreate): Observable<any> {
     // Convertir propiedades a PascalCase para que .NET las reconozca
-    const casoPascalCase = {
+    const casoApi = {
       IdUsuario: caso.idUsuario,
       IdCategoria: caso.idCategoria,
       Descripcion: caso.descripcion,
       Impacto: caso.impacto,
-      Conducta: caso.conducta
+      Conducta: caso.conducta,
+      id_usuario_jefe: caso.idUsuarioJefe, // Enviar en snake_case para el backend
+      Estatus: caso.estatus ?? 1 // Por defecto 1 = Activo
     };
     
     console.log('📤 Enviando (camelCase original):', caso);
-    console.log('📤 Enviando (PascalCase convertido):', casoPascalCase);
-    
-    return this.http.post(`${this.apiUrl}/Casos/crear`, casoPascalCase);
+    console.log('📤 Enviando (API convertido):', casoApi);
+    return this.http.post(`${this.apiUrl}/Casos/crear`, casoApi);
   }
 
   /**
-   * Obtiene TODAS las notas disciplinarias activas (solo para admin)
+   * Obtiene TODAS las notas disciplinarias activas DEL JEFE LOGUEADO
+   * @param idJefe - ID del jefe (obtenido del token)
    * @returns Observable con array de casos
    */
-  obtenerCasos(): Observable<any[]> {
+  obtenerCasos(idJefe?: number): Observable<any[]> {
+    if (idJefe) {
+      return this.http.get<any[]>(`${this.apiUrl}/admin/casos-activos?idJefe=${idJefe}`);
+    }
     return this.http.get<any[]>(`${this.apiUrl}/admin/casos-activos`);
   }
 
   /**
    * Obtiene las notas disciplinarias de un usuario específico
    * Usado cuando el usuario quiere ver sus propias notas
-   * @param idUsuario - ID del usuario
-   * @returns Observable con array de casos del usuario
+   * @param idUsuario - ID del usuario empleado
+   * @returns Observable con array de casos donde el usuario es el afectado
    */
   obtenerCasosPorUsuario(idUsuario: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/Casos/usuario/${idUsuario}`);
+    return this.http.get<any[]>(`${this.apiUrl}/admin/casos-activos?idUsuario=${idUsuario}`);
   }
 
   /**
