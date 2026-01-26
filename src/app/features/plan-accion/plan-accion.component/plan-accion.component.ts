@@ -2,10 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { PlanAccionService } from '../../../services/plan-accion.service';
 import { CasosService } from '../../../services/casos.service';
 import { PlanAccionCreateDto } from '../../../models/plan-accion.model';
 import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/navigation-buttons.component';
+import { AuthService } from '../../../services/auth.service';
+import { NotificationsService } from '../../../shared/notifications/notifications.service';
 
 @Component({
   selector: 'app-plan-accion',
@@ -16,6 +20,7 @@ import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/n
 })
 export class PlanAccionComponent {
   planForm: FormGroup;
+  cierreForm: FormGroup;
   mostrarTerminarProceso = false;
   idCaso: number = 0;
   idPaso3Existente: number = 0;
@@ -29,13 +34,19 @@ export class PlanAccionComponent {
     private route: ActivatedRoute,
     private router: Router,
     private planAccionService: PlanAccionService,
-    private casosService: CasosService
+    private casosService: CasosService,
+    private authService: AuthService,
+    private notifications: NotificationsService
   ) {
     this.planForm = this.fb.group({
       metas: ['', Validators.required],
       herramientas: [''],
       capacitacion: ['', Validators.required],
       documentacion: ['']
+    });
+
+    this.cierreForm = this.fb.group({
+      justificacion: ['', [Validators.required, Validators.minLength(10)]]
     });
   }
 
@@ -92,7 +103,8 @@ export class PlanAccionComponent {
     this.isLoading = true;
     this.errorMensaje = '';
 
-    const idUsuario = 0; // TODO: obtener del token
+    const info = this.authService.getTokenInfo();
+    const idUsuario = Number((info as any)?.Id ?? (info as any)?.UserId ?? 0) || 0;
     const payload: PlanAccionCreateDto = {
       id_caso: this.idCaso,
       metas_claras: this.planForm.value.metas,
@@ -105,9 +117,10 @@ export class PlanAccionComponent {
     this.planAccionService.guardarPaso3(payload).subscribe({
       next: (resp) => {
         this.isLoading = false;
+        const eraEdicion = this.modoEdicion;
         this.idPaso3Existente = resp.id_paso3;
         this.modoEdicion = true;
-        alert(`✅ Paso 3 ${this.modoEdicion ? 'actualizado' : 'guardado'} correctamente`);
+        this.notifications.success(`✅ Paso 3 ${eraEdicion ? 'actualizado' : 'guardado'} correctamente`);
       },
       error: (err) => {
         this.isLoading = false;
@@ -127,7 +140,9 @@ export class PlanAccionComponent {
       this.planAccionService.completarPaso3(this.idPaso3Existente).subscribe({
         next: (response) => {
           this.isLoading = false;
-          alert(`✅ ${response.message}`);
+          this.notifications.success('✅ Paso 3 completado.\nContinuar al paso 4.', {
+            title: 'Continuar'
+          });
           this.router.navigate(['/evaluar-resultados'], { queryParams: { idCaso: this.idCaso } });
         },
         error: () => {
@@ -143,7 +158,74 @@ export class PlanAccionComponent {
   }
 
   enviarCierre() {
-    alert('❌ Proceso finalizado con justificación enviada');
+    if (this.cierreForm.invalid) {
+      this.errorMensaje = 'Debe escribir la justificación de cierre (mín. 10 caracteres)';
+      return;
+    }
+
+    if (!this.idPaso3Existente || this.idPaso3Existente === 0) {
+      this.errorMensaje = 'Guarde primero el Paso 3 antes de cerrar el proceso';
+      return;
+    }
+
+    const info = this.authService.getTokenInfo();
+    const idUsuario = Number((info as any)?.Id ?? (info as any)?.UserId ?? 0) || null;
+
+    const justificacion = String(this.cierreForm.value.justificacion ?? '').trim();
+
+    this.isLoading = true;
+    this.errorMensaje = '';
+
+    const flagKey = 'supports.paso3.cerrar';
+    const skipCerrarPaso =
+      typeof localStorage !== 'undefined' && localStorage.getItem(flagKey) === 'false';
+
+    (skipCerrarPaso
+      ? of({ message: 'El backend no expone /cerrar en Paso 3. Se cerrará el caso directamente.' } as any)
+      : this.planAccionService
+          .cerrarPaso3(this.idPaso3Existente, {
+            justificacion_cierre: justificacion,
+            id_usuario_cierre: idUsuario
+          })
+          .pipe(
+            catchError((err) => {
+              if (err?.status === 404) {
+                try {
+                  if (typeof localStorage !== 'undefined') {
+                    localStorage.setItem(flagKey, 'false');
+                  }
+                } catch {
+                  // noop
+                }
+                return of({ message: 'El backend no expone /cerrar en Paso 3. Se cerrará el caso directamente.' } as any);
+              }
+              throw err;
+            })
+          )
+    )
+      .pipe(
+        switchMap((resp) =>
+          this.casosService
+            .cerrarCaso(this.idCaso, { justificacion_cierre: justificacion, id_usuario_cierre: idUsuario })
+            .pipe(map(() => resp))
+        )
+      )
+      .subscribe({
+        next: (resp) => {
+          this.isLoading = false;
+          this.notifications.success('✅ Caso cerrado correctamente');
+          this.router.navigate(['/admin']);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          const backendBody = err?.error;
+          this.errorMensaje =
+            (typeof backendBody === 'string'
+              ? backendBody
+              : (backendBody?.error ?? backendBody?.message ?? backendBody?.title)) ??
+            'No se pudo cerrar el proceso';
+        }
+      });
   }
 }
 

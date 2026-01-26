@@ -1,7 +1,7 @@
-<app-navigation-buttons></app-navigation-buttons>
+<app-navigation-buttons [backRoute]="'/admin'"></app-navigation-buttons>
 
 <div class="form-container">
-  <h2>Acta Administrativa (Paso 6)</h2>
+  <h2>6. Acta Administrativa</h2>
 
   <div *ngIf="errorMensaje" class="alert-error">{{ errorMensaje }}</div>
 
@@ -38,4 +38,21 @@
       <button type="button" class="cancel" (click)="finalizarProceso()" [disabled]="isLoading">Completar (cierra el caso)</button>
     </div>
   </form>
+
+  <div class="cierre-section">
+    <button type="button" class="btn-cierre" (click)="terminarProceso()" [disabled]="isLoading">
+      Terminar Proceso (cierre manual)
+    </button>
+
+    <div *ngIf="mostrarTerminarProceso" class="cierre-form" [formGroup]="cierreForm">
+      <label for="justificacionCierre">Justificación de cierre</label>
+      <textarea id="justificacionCierre" formControlName="justificacion" placeholder="Describe el motivo del cierre"></textarea>
+      <small *ngIf="cierreForm.get('justificacion')?.touched && cierreForm.get('justificacion')?.invalid">Campo requerido</small>
+
+      <div class="cierre-actions">
+        <button type="button" class="btn-cerrar" (click)="enviarCierre()" [disabled]="isLoading">Cerrar caso</button>
+        <button type="button" class="btn-cancelar" (click)="mostrarTerminarProceso=false" [disabled]="isLoading">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>

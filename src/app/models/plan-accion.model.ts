@@ -26,3 +26,14 @@ export interface PlanAccionCreateDto {
   documentacion_capacitacion?: string | null;
   id_usuario_registro?: number;
 }
+
+/**
+ * DTO de cierre del proceso desde el Paso 3.
+ *
+ * Nota: el backend debe soportar el endpoint `/cerrar` para que el cierre
+ * impacte en BD (y, si aplica, cierre también el caso).
+ */
+export interface PlanAccionCierreDto {
+  justificacion_cierre: string;
+  id_usuario_cierre?: number | null;
+}

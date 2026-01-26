@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -57,9 +57,19 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class NavigationButtonsComponent {
+  /**
+   * Ruta a la que navega el botón Regresar.
+   * Por defecto vuelve a login (comportamiento existente).
+   */
+  @Input() backRoute: string | any[] = ['/login'];
+
   constructor(private router: Router) {}
 
   goBack(): void {
-    this.router.navigate(['/login']);
+    if (Array.isArray(this.backRoute)) {
+      this.router.navigate(this.backRoute);
+      return;
+    }
+    this.router.navigate([this.backRoute]);
   }
 }

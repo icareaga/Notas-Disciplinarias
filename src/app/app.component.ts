@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from './services/auth.service';
+import { NotificationsComponent } from './shared/notifications/notifications.component';
 
 /**
  * APPCOMPONENT - Componente raíz de la aplicación
@@ -28,7 +29,7 @@ import { AuthService } from './services/auth.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NotificationsComponent],
   template: `
     <header class="header">
       <div class="header-content">
@@ -42,6 +43,8 @@ import { AuthService } from './services/auth.service';
         <span>Cerrar Sesión</span>
       </button>
     </header>
+
+    <app-notifications></app-notifications>
 
     <main class="content">
       <router-outlet></router-outlet>

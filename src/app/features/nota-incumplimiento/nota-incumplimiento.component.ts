@@ -2,12 +2,15 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { CasosService } from '../../services/casos.service';
 import { NotaIncumplimientoService } from '../../services/nota-incumplimiento.service';
 import { EvaluarResultadosService } from '../../services/evaluar-resultados.service';
 import { NotaIncumplimientoCreateDto } from '../../models/nota-incumplimiento.model';
 import { NavigationButtonsComponent } from '../../shared/navigation-buttons/navigation-buttons.component';
+import { NotificationsService } from '../../shared/notifications/notifications.service';
 
 @Component({
   selector: 'app-nota-incumplimiento',
@@ -35,7 +38,8 @@ export class NotaIncumplimientoComponent {
     private notaIncumplimientoService: NotaIncumplimientoService,
     private evaluarResultadosService: EvaluarResultadosService,
     private casosService: CasosService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notifications: NotificationsService
   ) {
     this.notaForm = this.fb.group({
       comportamiento: ['', Validators.required],
@@ -175,7 +179,7 @@ export class NotaIncumplimientoComponent {
         this.isLoading = false;
         this.idPaso5Existente = resp.id_paso5;
         this.modoEdicion = true;
-        alert(`✅ Paso 5 ${eraEdicion ? 'actualizado' : 'guardado'} correctamente`);
+        this.notifications.success(`✅ Paso 5 ${eraEdicion ? 'actualizado' : 'guardado'} correctamente`);
       },
       error: (err) => {
         this.isLoading = false;
@@ -198,7 +202,9 @@ export class NotaIncumplimientoComponent {
       this.notaIncumplimientoService.completarPaso5(this.idPaso5Existente).subscribe({
         next: (response) => {
           this.isLoading = false;
-          alert(`✅ ${response.message}`);
+          this.notifications.success('✅ Paso 5 completado.\nContinuar al paso 6.', {
+            title: 'Continuar'
+          });
           this.router.navigate(['/acta-administrativa'], { queryParams: { idCaso: this.idCaso } });
         },
         error: () => {
@@ -227,13 +233,30 @@ export class NotaIncumplimientoComponent {
     const info = this.authService.getTokenInfo();
     const idUsuario = Number((info as any)?.Id ?? (info as any)?.UserId ?? 0) || null;
 
+    const justificacion = String(this.cierreForm.value.justificacion ?? '').trim();
+
     this.isLoading = true;
     this.notaIncumplimientoService
-      .cerrarPaso5(this.idPaso5Existente, { justificacion_cierre: this.cierreForm.value.justificacion, id_usuario_cierre: idUsuario })
+      .cerrarPaso5(this.idPaso5Existente, { justificacion_cierre: justificacion, id_usuario_cierre: idUsuario })
+      // Además de cerrar el paso, cerramos el caso para asegurar Casos.estatus=0.
+      .pipe(
+        catchError((err) => {
+          if (err?.status === 404) {
+            return of({ message: 'El backend no expone /cerrar en Paso 5. Se cerrará el caso directamente.' } as any);
+          }
+          throw err;
+        }),
+        switchMap((resp) =>
+          this.casosService
+            .cerrarCaso(this.idCaso, { justificacion_cierre: justificacion, id_usuario_cierre: idUsuario })
+            .pipe(map(() => resp))
+        )
+      )
       .subscribe({
         next: (resp) => {
           this.isLoading = false;
-          alert(`✅ ${resp.message}`);
+          this.notifications.success('✅ Caso cerrado correctamente');
+          this.router.navigate(['/admin']);
         },
         error: () => {
           this.isLoading = false;

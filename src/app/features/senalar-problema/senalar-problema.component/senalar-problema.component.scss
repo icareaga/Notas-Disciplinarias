@@ -134,6 +134,28 @@ $megacable-blue: #0047bb;
   }
 }
 
+.acciones {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.btn-cerrar {
+  padding: 6px 12px;
+  background: #fff;
+  color: #d32f2f;
+  border: 1px solid rgba(211, 47, 47, 0.45);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+
+  &:hover {
+    background: rgba(211, 47, 47, 0.06);
+    border-color: rgba(211, 47, 47, 0.65);
+  }
+}
+
 .btn-cancelar {
   background: #f44336;
   color: white;
@@ -190,6 +212,64 @@ $megacable-blue: #0047bb;
     &:hover {
       background-color: #003a9c;
     }
+  }
+
+  // Botones secundarios dentro de la card (no deben heredar el estilo azul)
+  button.btn-terminar,
+  button.btn-cerrar-caso,
+  button.btn-cancelar-cierre {
+    margin-top: 0;
+  }
+}
+
+.cierre-panel {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e6eaf2;
+}
+
+.card button.btn-terminar {
+  background: #fff;
+  color: #d32f2f;
+  border: 1px solid rgba(211, 47, 47, 0.45);
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+  width: 100%;
+
+  &:hover {
+    background: rgba(211, 47, 47, 0.06);
+    border-color: rgba(211, 47, 47, 0.65);
+  }
+}
+
+.cierre-form {
+  margin-top: 12px;
+}
+
+.cierre-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.card button.btn-cerrar-caso {
+  flex: 1;
+  background: #d32f2f;
+  color: #fff;
+
+  &:hover {
+    background: #b71c1c;
+  }
+}
+
+.card button.btn-cancelar-cierre {
+  flex: 1;
+  background: #f3f4f6;
+  color: #111827;
+
+  &:hover {
+    background: #e5e7eb;
   }
 }
 

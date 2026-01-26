@@ -1,4 +1,4 @@
-<app-navigation-buttons></app-navigation-buttons>
+<app-navigation-buttons [backRoute]="'/admin'"></app-navigation-buttons>
 
 <div class="nota-wrapper">
   <!-- Card principal -->
@@ -52,7 +52,7 @@
         <!-- Derecha: Continuar / Terminar -->
         <div class="acciones-derecha">
           <button type="button" class="btn-continuar" (click)="continuarProceso()" [disabled]="isLoading">
-            Continuar Proceso
+            Continuar al paso 6
           </button>
 
           <button type="button" class="btn-terminar" (click)="terminarProceso()" [disabled]="isLoading">

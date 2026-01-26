@@ -92,3 +92,69 @@ ul {
     background: #0b7285;
   }
 }
+
+.cierre-section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e6eaf2;
+}
+
+.btn-cierre {
+  width: 100%;
+  background: #fff;
+  color: #d32f2f;
+  border: 1px solid rgba(211, 47, 47, 0.45);
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.cierre-form {
+  margin-top: 12px;
+
+  textarea {
+    width: 100%;
+    min-height: 90px;
+  }
+}
+
+.cierre-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+
+  .btn-cerrar {
+    flex: 1;
+    background: #d32f2f;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-cancelar {
+    flex: 1;
+    background: #e5e7eb;
+    color: #111827;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+  }
+}

@@ -44,6 +44,17 @@ export interface DeterminarCausaCreateDto {
 }
 
 /**
+ * DTO de cierre del proceso desde el Paso 2.
+ *
+ * Nota: el endpoint esperado suele marcar el paso como cerrado/inactivo y,
+ * dependiendo del backend, también puede marcar el caso como `estatus = 0`.
+ */
+export interface DeterminarCausaCierreDto {
+  justificacion_cierre: string;
+  id_usuario_cierre?: number | null;
+}
+
+/**
  * Respuesta del backend al guardar Paso 2
  */
 export interface DeterminarCausaResponse {

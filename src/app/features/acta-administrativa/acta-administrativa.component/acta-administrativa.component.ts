@@ -2,11 +2,14 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 import { CasosService } from '../../../services/casos.service';
 import { ActaAdministrativaService } from '../../../services/acta-administrativa.service';
 import { ActaAdministrativaCreateDto } from '../../../models/acta-administrativa.model';
 import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/navigation-buttons.component';
+import { NotificationsService } from '../../../shared/notifications/notifications.service';
 
 @Component({
   selector: 'app-acta-administrativa',
@@ -17,6 +20,8 @@ import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/n
 })
 export class ActaAdministrativaComponent {
   actaForm: FormGroup;
+  cierreForm: FormGroup;
+  mostrarTerminarProceso = false;
 
   idCaso = 0;
   idPaso6Existente = 0;
@@ -31,7 +36,8 @@ export class ActaAdministrativaComponent {
     private router: Router,
     private actaAdministrativaService: ActaAdministrativaService,
     private casosService: CasosService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notifications: NotificationsService
   ) {
     this.actaForm = this.fb.group({
       colaborador: ['', Validators.required],
@@ -39,6 +45,10 @@ export class ActaAdministrativaComponent {
       evidencias: [''],
       version_colaborador: [''],
       firmas: ['']
+    });
+
+    this.cierreForm = this.fb.group({
+      justificacion: ['', Validators.required]
     });
   }
 
@@ -116,7 +126,7 @@ export class ActaAdministrativaComponent {
         this.isLoading = false;
         this.idPaso6Existente = resp.id_paso6;
         this.modoEdicion = true;
-        alert(`✅ Paso 6 ${eraEdicion ? 'actualizado' : 'guardado'} correctamente`);
+        this.notifications.success(`✅ Paso 6 ${eraEdicion ? 'actualizado' : 'guardado'} correctamente`);
       },
       error: (err) => {
         this.isLoading = false;
@@ -151,10 +161,86 @@ export class ActaAdministrativaComponent {
         justificacion_cierre: 'Cierre automático al completar el Paso 6 (Acta Administrativa).',
         id_usuario_cierre: idUsuario
       })
+      .pipe(
+        catchError((err) => {
+          if (err?.status === 404) {
+            return of({ message: 'El backend no expone /cerrar en Paso 6. Se cerrará el caso directamente.' } as any);
+          }
+          throw err;
+        }),
+        switchMap((resp) =>
+          this.casosService
+            .cerrarCaso(this.idCaso, {
+              justificacion_cierre: 'Cierre automático al completar el Paso 6 (Acta Administrativa).',
+              id_usuario_cierre: idUsuario
+            })
+            .pipe(map(() => resp))
+        )
+      )
       .subscribe({
         next: (resp) => {
           this.isLoading = false;
-          alert(`✅ ${resp.message}`);
+          this.notifications.success('✅ Caso cerrado correctamente');
+          this.router.navigate(['/admin']);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          const backendBody = err?.error;
+          this.errorMensaje =
+            (typeof backendBody === 'string'
+              ? backendBody
+              : (backendBody?.error ?? backendBody?.message ?? backendBody?.title)) ??
+            'No se pudo cerrar el caso';
+        }
+      });
+  }
+
+  terminarProceso() {
+    this.mostrarTerminarProceso = true;
+  }
+
+  enviarCierre() {
+    if (this.cierreForm.invalid) {
+      this.errorMensaje = 'Debe escribir la justificación de cierre';
+      this.cierreForm.markAllAsTouched();
+      return;
+    }
+
+    if (!this.idPaso6Existente || this.idPaso6Existente === 0) {
+      this.errorMensaje = 'Guarde primero el Paso 6 antes de cerrar el proceso';
+      return;
+    }
+
+    const info = this.authService.getTokenInfo();
+    const idUsuario = Number((info as any)?.Id ?? (info as any)?.UserId ?? 0) || null;
+
+    const justificacion = String(this.cierreForm.value.justificacion ?? '').trim();
+
+    this.isLoading = true;
+    this.errorMensaje = '';
+
+    this.actaAdministrativaService
+      .cerrarPaso6(this.idPaso6Existente, {
+        justificacion_cierre: justificacion,
+        id_usuario_cierre: idUsuario
+      })
+      .pipe(
+        catchError((err) => {
+          if (err?.status === 404) {
+            return of({ message: 'El backend no expone /cerrar en Paso 6. Se cerrará el caso directamente.' } as any);
+          }
+          throw err;
+        }),
+        switchMap((resp) =>
+          this.casosService
+            .cerrarCaso(this.idCaso, { justificacion_cierre: justificacion, id_usuario_cierre: idUsuario })
+            .pipe(map(() => resp))
+        )
+      )
+      .subscribe({
+        next: (resp) => {
+          this.isLoading = false;
+          this.notifications.success('✅ Caso cerrado correctamente');
           this.router.navigate(['/admin']);
         },
         error: (err) => {

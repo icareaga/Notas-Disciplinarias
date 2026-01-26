@@ -2,10 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { DeterminarCausaService } from '../../../services/determinar-causa.service';
 import { CasosService } from '../../../services/casos.service';
 import { DeterminarCausaCreateDto } from '../../../models/determinar-causa.model';
 import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/navigation-buttons.component';
+import { AuthService } from '../../../services/auth.service';
+import { NotificationsService } from '../../../shared/notifications/notifications.service';
 
 @Component({
   selector: 'app-determinar-causa',
@@ -16,6 +20,7 @@ import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/n
 })
 export class DeterminarCausaComponent implements OnInit {
   causaForm: FormGroup;
+  cierreForm: FormGroup;
   mostrarTerminarProceso = false;
   idCaso: number = 0;
   idPaso2Existente: number = 0; // Si > 0, estamos editando
@@ -30,11 +35,17 @@ export class DeterminarCausaComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private determinarCausaService: DeterminarCausaService,
-    private casosService: CasosService
+    private casosService: CasosService,
+    private authService: AuthService,
+    private notifications: NotificationsService
   ) {
     this.causaForm = this.fb.group({
       causasIdentificadas: ['', [Validators.required, Validators.minLength(10)]],
       comentarios: ['']
+    });
+
+    this.cierreForm = this.fb.group({
+      justificacion: ['', [Validators.required, Validators.minLength(10)]]
     });
   }
 
@@ -144,8 +155,9 @@ export class DeterminarCausaComponent implements OnInit {
     this.isLoading = true;
     this.errorMensaje = '';
 
-    // Obtener ID de usuario del localStorage (si está implementado)
-    const idUsuario = 0; // TODO: Obtener del token JWT o localStorage
+    // Obtener ID de usuario del token (siempre puede venir como string/number)
+    const info = this.authService.getTokenInfo();
+    const idUsuario = Number((info as any)?.Id ?? (info as any)?.UserId ?? 0) || 0;
 
     const datos: DeterminarCausaCreateDto = {
       id_caso: this.idCaso,
@@ -158,13 +170,14 @@ export class DeterminarCausaComponent implements OnInit {
     this.determinarCausaService.guardarCompleto(datos, this.archivosSeleccionados, idUsuario).subscribe({
       next: (result) => {
         this.isLoading = false;
+        const eraEdicion = this.modoEdicion;
         const totalEvidencias = result.evidencias.length;
         
         // Guardar el ID del paso 2 para poder continuar después
         this.idPaso2Existente = result.paso2.id_paso2;
         this.modoEdicion = true;
         
-        alert(`✅ Paso 2 ${this.modoEdicion ? 'actualizado' : 'guardado'} correctamente\n${totalEvidencias} evidencia(s) subida(s)`);
+        this.notifications.success(`✅ Paso 2 ${eraEdicion ? 'actualizado' : 'guardado'} correctamente\n${totalEvidencias} evidencia(s) subida(s)`);
         
         // Limpiar archivos seleccionados
         this.archivosSeleccionados = [];
@@ -196,7 +209,9 @@ export class DeterminarCausaComponent implements OnInit {
       this.determinarCausaService.completarPaso2(this.idPaso2Existente).subscribe({
         next: (response) => {
           this.isLoading = false;
-          alert(`✅ ${response.message}`);
+          this.notifications.success('✅ Paso 2 completado.\nContinuar al paso 3.', {
+            title: 'Continuar'
+          });
           // Navegar al Paso 3
           this.router.navigate(['/plan-accion'], { queryParams: { idCaso: this.idCaso } });
         },
@@ -214,8 +229,74 @@ export class DeterminarCausaComponent implements OnInit {
   }
 
   enviarCierre() {
-    alert('Proceso terminado. Justificación enviada ✅');
-    console.log('Justificación:', this.causaForm.value);
-    // TODO: Implementar endpoint de cierre de caso
+    if (this.cierreForm.invalid) {
+      this.errorMensaje = 'Debe escribir la justificación de cierre (mín. 10 caracteres)';
+      return;
+    }
+
+    if (!this.idPaso2Existente || this.idPaso2Existente === 0) {
+      this.errorMensaje = 'Guarde primero el Paso 2 antes de cerrar el proceso';
+      return;
+    }
+
+    const info = this.authService.getTokenInfo();
+    const idUsuario = Number((info as any)?.Id ?? (info as any)?.UserId ?? 0) || null;
+
+    const justificacion = String(this.cierreForm.value.justificacion ?? '').trim();
+
+    this.isLoading = true;
+    this.errorMensaje = '';
+
+    // Nota: este endpoint debe existir en el backend para que el cierre impacte BD.
+    const flagKey = 'supports.paso2.cerrar';
+    const skipCerrarPaso =
+      typeof localStorage !== 'undefined' && localStorage.getItem(flagKey) === 'false';
+
+    (skipCerrarPaso
+      ? of({ message: 'El backend no expone /cerrar en Paso 2. Se cerrará el caso directamente.' } as any)
+      : this.determinarCausaService
+          .cerrarPaso2(this.idPaso2Existente, {
+            justificacion_cierre: justificacion,
+            id_usuario_cierre: idUsuario
+          })
+          .pipe(
+            catchError((err) => {
+              if (err?.status === 404) {
+                try {
+                  if (typeof localStorage !== 'undefined') {
+                    localStorage.setItem(flagKey, 'false');
+                  }
+                } catch {
+                  // noop
+                }
+                return of({ message: 'El backend no expone /cerrar en Paso 2. Se cerrará el caso directamente.' } as any);
+              }
+              throw err;
+            })
+          )
+    )
+      .pipe(
+        switchMap((resp) =>
+          this.casosService
+            .cerrarCaso(this.idCaso, { justificacion_cierre: justificacion, id_usuario_cierre: idUsuario })
+            .pipe(map(() => resp))
+        )
+      )
+      .subscribe({
+        next: (resp) => {
+          this.isLoading = false;
+          this.notifications.success('✅ Caso cerrado correctamente');
+          this.router.navigate(['/admin']);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          const backendBody = err?.error;
+          this.errorMensaje =
+            (typeof backendBody === 'string'
+              ? backendBody
+              : (backendBody?.error ?? backendBody?.message ?? backendBody?.title)) ??
+            'No se pudo cerrar el proceso';
+        }
+      });
   }
 }

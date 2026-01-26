@@ -1,7 +1,7 @@
-<app-navigation-buttons></app-navigation-buttons>
+<app-navigation-buttons [backRoute]="'/admin'"></app-navigation-buttons>
 
 <div class="card">
-  <h2>Paso 3. Establecer Plan de Acción</h2>
+  <h2>3. Establecer Plan de Acción</h2>
 
   <div *ngIf="errorMensaje" style="margin: 10px 0; padding: 10px; border: 1px solid #c62828; background: #ffebee; color:#b71c1c; border-radius:6px;">
     {{ errorMensaje }}
@@ -35,7 +35,7 @@
 
   <!-- Botones de flujo -->
   <div class="acciones">
-    <button class="btn-continuar" (click)="continuarProceso()" [disabled]="isLoading">Continuar Proceso</button>
+    <button class="btn-continuar" (click)="continuarProceso()" [disabled]="isLoading">Continuar al paso 4</button>
     <button class="btn-terminar" (click)="terminarProceso()" [disabled]="isLoading">Terminar Proceso</button>
   </div>
 </div>
@@ -43,10 +43,10 @@
 <!-- Card de cierre -->
 <div class="card" *ngIf="mostrarTerminarProceso">
   <h3>Justificación de Cierre</h3>
-  <form (ngSubmit)="enviarCierre()">
+  <form [formGroup]="cierreForm" (ngSubmit)="enviarCierre()">
     <div class="form-group">
       <label>Motivo de finalización*</label>
-      <textarea rows="3" placeholder="Explique por qué se cierra el proceso..."></textarea>
+      <textarea rows="3" formControlName="justificacion" placeholder="Explique por qué se cierra el proceso..."></textarea>
     </div>
     <button type="submit" class="btn-guardar">Enviar Justificación</button>
   </form>

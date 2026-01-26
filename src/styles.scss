@@ -13,6 +13,13 @@ html, body {
   height: 100%;
 }
 
+/* Evita overflow horizontal por padding/border en width: 100% */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 /* Títulos */
 h1, h2, h3, h4, h5 {
   color: $megacable-blue;
@@ -43,4 +50,16 @@ button {
   padding: 16px;
   margin: 12px 0;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Evitar que los textarea se estiren a la derecha (solo vertical) */
+textarea {
+  resize: vertical;
+  max-width: 100%;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
 }

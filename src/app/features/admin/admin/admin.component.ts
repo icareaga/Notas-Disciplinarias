@@ -15,6 +15,7 @@ import { NotaIncumplimientoService } from '../../../services/nota-incumplimiento
 import { ActaAdministrativaService } from '../../../services/acta-administrativa.service';
 import { ActaAdministrativaResponse } from '../../../models/acta-administrativa.model';
 import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/navigation-buttons.component';
+import { NotificationsService } from '../../../shared/notifications/notifications.service';
 
 type EstadoPaso =
   | 'SENALAR_PROBLEMA'
@@ -122,7 +123,8 @@ export class AdminComponent implements OnInit {
     private planAccionService: PlanAccionService,
     private evaluarResultadosService: EvaluarResultadosService,
     private notaIncumplimientoService: NotaIncumplimientoService,
-    private actaAdministrativaService: ActaAdministrativaService
+    private actaAdministrativaService: ActaAdministrativaService,
+    private notifications: NotificationsService
   ) {}
 
   ngOnInit(): void {
@@ -175,7 +177,7 @@ export class AdminComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ Error al cargar casos:', err);
-        alert('Error al cargar casos: ' + err.status + ' - ' + err.statusText);
+        this.notifications.error('Error al cargar casos: ' + (err?.status ?? '') + ' - ' + (err?.statusText ?? ''));
       }
     });
   }
@@ -415,7 +417,7 @@ export class AdminComponent implements OnInit {
       !this.nuevoCaso.impacto.trim() ||
       !this.nuevoCaso.conducta.trim()
     ) {
-      alert('Completa todos los campos');
+      this.notifications.warning('Completa todos los campos');
       return;
     }
 
@@ -424,7 +426,7 @@ export class AdminComponent implements OnInit {
         this.nuevoCaso = { idUsuario: 0, idCategoria: 0, descripcion: '', impacto: '', conducta: '' };
         this.cargarCasos();
       },
-      error: () => alert('Error al crear el caso')
+      error: () => this.notifications.error('Error al crear el caso')
     });
   }
 
@@ -441,7 +443,7 @@ export class AdminComponent implements OnInit {
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      error: () => alert('No se pudo descargar el PDF')
+      error: () => this.notifications.error('No se pudo descargar el PDF')
     });
   }
 
@@ -744,7 +746,7 @@ export class AdminComponent implements OnInit {
   /** Editar caso - Navega al paso correspondiente */
   editarCaso(caso: CasoUI): void {
     if (caso?.estatusCaso !== 1) {
-      alert('Este caso está cerrado. No se puede editar.');
+      this.notifications.warning('Este caso está cerrado. No se puede editar.');
       return;
     }
     const nombresPasos: { [key: number]: string } = {
@@ -775,7 +777,7 @@ export class AdminComponent implements OnInit {
     const caso = this.casoParaEditar;
 
     if (caso?.estatusCaso !== 1) {
-      alert('Este caso está cerrado. No se puede editar ni avanzar pasos.');
+      this.notifications.warning('Este caso está cerrado. No se puede editar ni avanzar pasos.');
       return;
     }
 
@@ -798,7 +800,7 @@ export class AdminComponent implements OnInit {
     if (this.avanzandoPaso) return;
 
     if (caso?.estatusCaso !== 1) {
-      alert('Este caso está cerrado. No se puede avanzar.');
+      this.notifications.warning('Este caso está cerrado. No se puede avanzar.');
       return;
     }
 
@@ -814,7 +816,7 @@ export class AdminComponent implements OnInit {
 
     const fallar = (mensaje: string, pasoFallback: number) => {
       this.avanzandoPaso = false;
-      alert(mensaje);
+      this.notifications.warning(mensaje);
       this.cerrarModalEditar();
       this.navegarAPaso(caso.id, pasoFallback);
     };

@@ -1,6 +1,6 @@
 <div class="page-container">
   <!-- Componente de navegación reutilizable con botón "Regresar" -->
-  <app-navigation-buttons></app-navigation-buttons>
+  <app-navigation-buttons [backRoute]="'/admin'"></app-navigation-buttons>
 
   <!-- Mostrar/Ocultar casos existentes (oculto por defecto) -->
   <button
@@ -39,9 +39,11 @@
             </span>
           </td>
           <td>
-            <button class="btn-accion" (click)="seleccionarCaso(caso); $event.stopPropagation()">
-              {{ caso.id_paso < 6 ? '➡️ Avanzar' : '📝 Editar' }}
-            </button>
+            <div class="acciones">
+              <button class="btn-accion" (click)="seleccionarCaso(caso); $event.stopPropagation()">
+                {{ caso.id_paso < 6 ? '➡️ Avanzar' : '📝 Editar' }}
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -95,5 +97,29 @@
   <button (click)="crearCaso()">
     {{ modoEdicion ? '💾 Actualizar Caso' : '💾 Guardar Caso' }}
   </button>
+
+  <!-- Cierre manual disponible en cualquier paso, incluyendo Paso 1 (edición) -->
+  <div *ngIf="modoEdicion" class="cierre-panel">
+    <button type="button" class="btn-terminar" (click)="mostrarCierre = !mostrarCierre">
+      🛑 Terminar Proceso
+    </button>
+
+    <div *ngIf="mostrarCierre" class="cierre-form">
+      <label>Justificación de cierre:</label>
+      <textarea
+        rows="3"
+        [(ngModel)]="justificacionCierre"
+        placeholder="Describe el motivo por el cual se cerrará el caso"></textarea>
+
+      <div class="cierre-actions">
+        <button type="button" class="btn-cerrar-caso" (click)="cerrarCasoActual()" [disabled]="isCerrando">
+          {{ isCerrando ? 'Cerrando...' : 'Cerrar caso' }}
+        </button>
+        <button type="button" class="btn-cancelar-cierre" (click)="cancelarCierre()" [disabled]="isCerrando">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
   </div>
 </div>

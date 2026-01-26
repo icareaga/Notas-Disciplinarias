@@ -2,11 +2,14 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { CasosService } from '../../../services/casos.service';
 import { AuthService } from '../../../services/auth.service';
 import { EvaluarResultadosService } from '../../../services/evaluar-resultados.service';
 import { EvaluarResultadosCreateDto } from '../../../models/evaluar-resultados.model';
 import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/navigation-buttons.component';
+import { NotificationsService } from '../../../shared/notifications/notifications.service';
 
 @Component({
   selector: 'app-evaluar-resultados',
@@ -32,7 +35,8 @@ export class EvaluarResultadosComponent {
     private router: Router,
     private evaluarResultadosService: EvaluarResultadosService,
     private casosService: CasosService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notifications: NotificationsService
   ) {
     this.evaluacionForm = this.fb.group({
       sesion: ['', Validators.required],
@@ -114,9 +118,10 @@ export class EvaluarResultadosComponent {
     this.evaluarResultadosService.guardarPaso4(payload).subscribe({
       next: (resp) => {
         this.isLoading = false;
+        const eraEdicion = this.modoEdicion;
         this.idPaso4Existente = resp.id_paso4;
         this.modoEdicion = true;
-        alert(`✅ Paso 4 ${this.modoEdicion ? 'actualizado' : 'guardado'} correctamente`);
+        this.notifications.success(`✅ Paso 4 ${eraEdicion ? 'actualizado' : 'guardado'} correctamente`);
       },
       error: (err) => {
         this.isLoading = false;
@@ -139,7 +144,9 @@ export class EvaluarResultadosComponent {
       this.evaluarResultadosService.completarPaso4(this.idPaso4Existente).subscribe({
         next: (response) => {
           this.isLoading = false;
-          alert(`✅ ${response.message}`);
+          this.notifications.success('✅ Paso 4 completado.\nContinuar al paso 5.', {
+            title: 'Continuar'
+          });
           this.router.navigate(['/nota-incumplimiento'], { queryParams: { idCaso: this.idCaso } });
         },
         error: () => {
@@ -165,13 +172,32 @@ export class EvaluarResultadosComponent {
       return;
     }
 
+    const info = this.authService.getTokenInfo();
+    const idUsuario = Number((info as any)?.Id ?? (info as any)?.UserId ?? 0) || null;
+    const justificacion = String(this.cierreForm.value.justificacion ?? '').trim();
+
     this.isLoading = true;
     this.evaluarResultadosService
-      .cerrarPaso4(this.idPaso4Existente, { justificacion_cierre: this.cierreForm.value.justificacion })
+      .cerrarPaso4(this.idPaso4Existente, { justificacion_cierre: justificacion })
+      // Además de cerrar el paso, cerramos el caso para asegurar Casos.estatus=0.
+      .pipe(
+        catchError((err) => {
+          if (err?.status === 404) {
+            return of({ message: 'El backend no expone /cerrar en Paso 4. Se cerrará el caso directamente.' } as any);
+          }
+          throw err;
+        }),
+        switchMap((resp) =>
+          this.casosService
+            .cerrarCaso(this.idCaso, { justificacion_cierre: justificacion, id_usuario_cierre: idUsuario })
+            .pipe(map(() => resp))
+        )
+      )
       .subscribe({
         next: (resp) => {
           this.isLoading = false;
-          alert(`✅ ${resp.message}`);
+          this.notifications.success('✅ Caso cerrado correctamente');
+          this.router.navigate(['/admin']);
         },
         error: () => {
           this.isLoading = false;

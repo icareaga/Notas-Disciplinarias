@@ -7,7 +7,8 @@ import {
   DeterminarCausaCreateDto, 
   DeterminarCausaResponse,
   DeterminarCausaEvidencia,
-  EvidenciaResponse
+  EvidenciaResponse,
+  DeterminarCausaCierreDto
 } from '../models/determinar-causa.model';
 import { environment } from '../../environments/environment';
 
@@ -131,6 +132,17 @@ export class DeterminarCausaService {
       `${this.apiUrl}/${idPaso2}/completar`,
       {}
     );
+  }
+
+  /**
+   * Cierra el proceso desde el Paso 2 (si el backend lo soporta).
+   * PUT /api/DeterminarCausa/{idPaso2}/cerrar
+   */
+  cerrarPaso2(
+    idPaso2: number,
+    dto: DeterminarCausaCierreDto
+  ): Observable<{ message: string; id_paso_actual?: number }> {
+    return this.http.put<{ message: string; id_paso_actual?: number }>(`${this.apiUrl}/${idPaso2}/cerrar`, dto);
   }
 
   /**

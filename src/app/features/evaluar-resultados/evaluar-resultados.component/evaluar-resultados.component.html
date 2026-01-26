@@ -1,4 +1,4 @@
-<app-navigation-buttons></app-navigation-buttons>
+<app-navigation-buttons [backRoute]="'/admin'"></app-navigation-buttons>
 
 <div class="card">
   <h2>4. Evaluar Resultados</h2>
@@ -35,7 +35,7 @@
 
   <!-- Botones de flujo -->
   <div class="acciones">
-    <button class="btn-continuar" (click)="continuarProceso()" [disabled]="isLoading">Continuar Proceso</button>
+    <button class="btn-continuar" (click)="continuarProceso()" [disabled]="isLoading">Continuar al paso 5</button>
     <button class="btn-terminar" (click)="terminarProceso()" [disabled]="isLoading">Terminar Proceso</button>
   </div>
 </div>

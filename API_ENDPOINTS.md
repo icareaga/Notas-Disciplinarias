@@ -77,6 +77,40 @@ Crea una nueva nota disciplinaria.
 
 ---
 
+#### **PUT /api/Casos/{idCaso}**
+Actualiza un caso existente (usado principalmente al editar el Paso 1: “Señalar Problema”).
+
+**Request Body (mismo formato que crear):**
+```json
+{
+  "IdUsuario": 101,
+  "id_categoria": 5,
+  "descripcion": "...",
+  "impacto": "...",
+  "conducta": "...",
+  "id_usuario_jefe": 12345,
+  "estatus": 1,
+  "id_paso": 2
+}
+```
+
+---
+
+#### **PUT /api/Casos/{idCaso}/cerrar**
+Cierra manualmente un caso.
+
+**Nota importante:** el frontend intenta primero este endpoint. Si el backend responde `404`, el frontend hace fallback a `PUT /api/Casos/{idCaso}` enviando `estatus = 0`.
+
+**Request Body:**
+```json
+{
+  "justificacion_cierre": "Cierre manual por decisión del responsable",
+  "id_usuario_cierre": 12345
+}
+```
+
+---
+
 #### **GET /api/admin/casos**
 Obtiene casos (activos + cerrados) del jefe autenticado o de un usuario específico.
 

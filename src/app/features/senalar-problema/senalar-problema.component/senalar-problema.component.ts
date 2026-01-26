@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
  
 import { CasoCreate } from '../../../models/caso-create.model';
@@ -11,6 +12,7 @@ import { CasosService } from '../../../services/casos.service';
 import { CategoriasService } from '../../../services/categorias.service';
 import { AuthService } from '../../../services/auth.service';
 import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/navigation-buttons.component';
+import { NotificationsService } from '../../../shared/notifications/notifications.service';
 
 /**
  * SENALARPROBLEMACOMPONENT - Formulario principal para crear notas disciplinarias
@@ -37,6 +39,12 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
   modoEdicion = false; // Si está editando un caso existente
   idCasoActual: number = 0; // ID del caso que se está editando
   private routerSubscription?: Subscription; // Para detectar cuando regresas a esta vista
+  private routeSubscription?: Subscription;
+
+  // Cierre manual (Paso 1)
+  mostrarCierre = false;
+  justificacionCierre = '';
+  isCerrando = false;
   
   nuevoCaso: CasoCreate = {
     idUsuario: 0,
@@ -53,7 +61,9 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
     private casosService: CasosService,
     private categoriasService: CategoriasService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+        private route: ActivatedRoute,
+        private notifications: NotificationsService
   ) {
     // Detectar cuando regresas a esta vista desde otra ruta
     this.routerSubscription = this.router.events.pipe(
@@ -72,6 +82,7 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routerSubscription?.unsubscribe();
+    this.routeSubscription?.unsubscribe();
   }
 
   compareNumbers(o1: any, o2: any): boolean {
@@ -118,6 +129,17 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
     console.log('👤 ID del Jefe que crea el caso:', idJefe, 'tipo:', typeof idJefe);
     
     const idUsuario = String(idJefe);
+
+    // Si llegamos desde Admin con ?idCaso=XX, cargar ese caso para edición en Paso 1.
+    this.routeSubscription = this.route.queryParams.subscribe((params) => {
+      const idCaso = Number(params?.['idCaso'] ?? 0);
+      if (idCaso > 0) {
+        this.casosService.obtenerCasoPorId(idCaso).subscribe({
+          next: (caso) => this.editarCaso(caso),
+          error: (err) => console.error('❌ No se pudo cargar caso para edición:', err)
+        });
+      }
+    });
  
     this.categoriasService.obtenerCategorias().subscribe({
       next: (data: Categoria[]) => {
@@ -255,19 +277,28 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
    * Edita el caso actual (Paso 1)
    */
   editarCaso(caso: any): void {
+    const idCaso = Number(caso?.id_caso ?? caso?.IdCaso ?? caso?.idCaso ?? caso?.id ?? 0);
+    if (!idCaso) {
+      console.error('❌ editarCaso(): no se encontró id del caso', caso);
+      return;
+    }
+
     this.modoEdicion = true;
-    this.idCasoActual = caso.id_caso;
+    this.idCasoActual = idCaso;
+    this.mostrarListaCasos = false;
+    this.mostrarCierre = false;
+    this.justificacionCierre = '';
     
     // Cargar datos en el formulario
     this.nuevoCaso = {
-      idUsuario: caso.id_usuario,
-      idCategoria: caso.id_categoria,
-      descripcion: caso.descripcion,
-      impacto: caso.impacto,
-      conducta: caso.conducta,
-      idUsuarioJefe: caso.id_usuario_jefe,
-      estatus: caso.estatus,
-      idPaso: caso.id_paso
+      idUsuario: Number(caso?.id_usuario ?? caso?.IdUsuario ?? caso?.idUsuario ?? 0),
+      idCategoria: Number(caso?.id_categoria ?? caso?.IdCategoria ?? caso?.idCategoria ?? 0),
+      descripcion: String(caso?.descripcion ?? caso?.Descripcion ?? ''),
+      impacto: String(caso?.impacto ?? caso?.Impacto ?? ''),
+      conducta: String(caso?.conducta ?? caso?.Conducta ?? ''),
+      idUsuarioJefe: Number(caso?.id_usuario_jefe ?? caso?.IdUsuarioJefe ?? caso?.idUsuarioJefe ?? this.nuevoCaso.idUsuarioJefe ?? 0) || 0,
+      estatus: Number(caso?.estatus ?? caso?.Estatus ?? 1),
+      idPaso: Number(caso?.id_paso ?? caso?.IdPaso ?? caso?.idPaso ?? 1) || 1
     };
 
     console.log('📝 Editando caso:', this.idCasoActual);
@@ -280,6 +311,8 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
   cancelarEdicion(): void {
     this.modoEdicion = false;
     this.idCasoActual = 0;
+    this.mostrarCierre = false;
+    this.justificacionCierre = '';
     this.nuevoCaso = {
       idUsuario: 0,
       idCategoria: 0,
@@ -290,6 +323,86 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
       estatus: 1,
       idPaso: 1
     };
+  }
+
+  cancelarCierre(): void {
+    this.mostrarCierre = false;
+    this.justificacionCierre = '';
+  }
+
+  cerrarCasoActual(): void {
+    if (!this.modoEdicion || !this.idCasoActual) {
+      return;
+    }
+
+    const justificacion = (this.justificacionCierre ?? '').trim();
+    if (!justificacion) {
+      this.notifications.warning('Escribe una justificación para cerrar el caso');
+      return;
+    }
+
+    if (!confirm('¿Deseas cerrar este caso? Esta acción marcará el caso como cerrado (estatus=0).')) {
+      return;
+    }
+
+    const tokenInfo = this.authService.getTokenInfo();
+    const idUsuarioCierre =
+      Number(tokenInfo?.Id || tokenInfo?.UserId || (tokenInfo as any)?.['id'] || (tokenInfo as any)?.['userId'] || 0) || null;
+    const idJefe = String(tokenInfo?.Id || tokenInfo?.UserId || (tokenInfo as any)?.['id'] || '');
+
+    this.isCerrando = true;
+    this.casosService
+      .cerrarCaso(this.idCasoActual, { justificacion_cierre: justificacion, id_usuario_cierre: idUsuarioCierre })
+      .subscribe({
+        next: () => {
+          this.isCerrando = false;
+          this.notifications.success('✅ Caso cerrado correctamente');
+          this.cancelarEdicion();
+          if (idJefe) {
+            this.cargarMisCasos(idJefe);
+          }
+        },
+        error: (err) => {
+          this.isCerrando = false;
+          console.error('❌ Error al cerrar caso:', err);
+          const details =
+            (typeof err?.error === 'string'
+              ? err.error
+              : (err?.error?.message ?? err?.error?.title ?? err?.statusText ?? '')) || 'Error desconocido';
+          this.notifications.error(`No se pudo cerrar el caso. ${details}`);
+        }
+      });
+  }
+
+  cerrarCasoDesdeLista(caso: any): void {
+    const idCaso = Number(caso?.id_caso ?? caso?.IdCaso ?? caso?.idCaso ?? 0);
+    if (!idCaso) return;
+
+    const justificacion = (prompt('Justificación de cierre del caso:') ?? '').trim();
+    if (!justificacion) return;
+
+    const tokenInfo = this.authService.getTokenInfo();
+    const idUsuarioCierre =
+      Number(tokenInfo?.Id || tokenInfo?.UserId || (tokenInfo as any)?.['id'] || (tokenInfo as any)?.['userId'] || 0) || null;
+    const idJefe = String(tokenInfo?.Id || tokenInfo?.UserId || (tokenInfo as any)?.['id'] || '');
+
+    this.isCerrando = true;
+    this.casosService
+      .cerrarCaso(idCaso, { justificacion_cierre: justificacion, id_usuario_cierre: idUsuarioCierre })
+      .subscribe({
+        next: () => {
+          this.isCerrando = false;
+          this.notifications.success('✅ Caso cerrado correctamente');
+          if (idJefe) {
+            this.cargarMisCasos(idJefe);
+          }
+        },
+        error: (err) => {
+          this.isCerrando = false;
+          console.error('❌ Error al cerrar caso:', err);
+          this.notifications.error('No se pudo cerrar el caso');
+        }
+      });
   }
 
   /**
@@ -344,7 +457,7 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
 
     if (!this.nuevoCaso.idUsuario || !this.nuevoCaso.idCategoria || !this.nuevoCaso.descripcion?.trim() || 
         !this.nuevoCaso.impacto?.trim() || !this.nuevoCaso.conducta?.trim()) {
-      alert('Completa todos los campos obligatorios');
+      this.notifications.warning('Completa todos los campos obligatorios');
       return;
     }
 
@@ -355,20 +468,21 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
     });
     
     if (!categoriaExiste) {
-      alert(`Error: La categoría con ID ${this.nuevoCaso.idCategoria} no existe. Selecciona una categoría válida.`);
+      this.notifications.error(`Error: La categoría con ID ${this.nuevoCaso.idCategoria} no existe. Selecciona una categoría válida.`);
       console.error('❌ Categoría no encontrada. Buscando ID:', this.nuevoCaso.idCategoria);
       console.error('❌ Categorías disponibles:', this.categorias);
       return;
     }
 
-    // Regla de avance: al guardar Paso 1, el caso queda listo para Paso 2.
-    // Si estamos editando un caso que ya avanzó más, NO regresarlo; mantener el paso actual.
-    const idPasoActual = Number(this.nuevoCaso.idPaso ?? 1);
-    this.nuevoCaso.idPaso = Math.max(idPasoActual, 2);
+    // IMPORTANTE: Guardar Paso 1 NO debe avanzar automáticamente a Paso 2.
+    // - Caso nuevo: se queda en Paso 1.
+    // - Caso en edición: preserva el paso actual (no lo regresa).
+    const idPasoActual = Number(this.nuevoCaso.idPaso ?? 1) || 1;
+    this.nuevoCaso.idPaso = this.modoEdicion ? idPasoActual : 1;
     
     console.log('📤 ENVIANDO CASO COMPLETO:', this.nuevoCaso);
     console.log('✅ Categoría verificada:', categoriaExiste.nombre);
-    console.log('✅ idPaso calculado (mín. 2):', this.nuevoCaso.idPaso);
+    console.log('✅ idPaso calculado (no auto-avanza):', this.nuevoCaso.idPaso);
 
     const tokenInfo = this.authService.getTokenInfo();
     const idJefe = String(tokenInfo?.Id || tokenInfo?.UserId);
@@ -377,7 +491,7 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
       this.casosService.actualizarCasoPaso1(this.idCasoActual, this.nuevoCaso).subscribe({
         next: (respuesta: any) => {
           console.log('✅ Caso actualizado:', respuesta);
-          alert('Caso actualizado correctamente');
+          this.notifications.success('Caso actualizado correctamente');
 
           // Salir de edición y recargar lista
           this.cancelarEdicion();
@@ -385,7 +499,7 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('❌ Error al actualizar caso:', err);
-          alert(`Error al actualizar el caso: ${err.error?.message || err.statusText || 'Error desconocido'}`);
+          this.notifications.error(`Error al actualizar el caso: ${err.error?.message || err.statusText || 'Error desconocido'}`);
         }
       });
       return;
@@ -394,7 +508,7 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
     this.casosService.crearCaso(this.nuevoCaso).subscribe({
       next: (respuesta: any) => {
         console.log('✅ Caso creado:', respuesta);
-        alert('Caso creado correctamente');
+        this.notifications.success('Caso creado correctamente');
 
         this.cargarMisCasos(idJefe);
 
@@ -407,14 +521,14 @@ export class SenalarProblemaComponent implements OnInit, OnDestroy {
           conducta: '',
           idUsuarioJefe: this.nuevoCaso.idUsuarioJefe,
           estatus: 1,
-          idPaso: 2
+          idPaso: 1
         };
       },
       error: (err) => {
         console.error('❌ Error:', err);
         console.error('Status:', err.status);
         console.error('Error detalle:', err.error);
-        alert(`Error al crear el caso: ${err.error?.message || err.statusText || 'Error desconocido'}`);
+        this.notifications.error(`Error al crear el caso: ${err.error?.message || err.statusText || 'Error desconocido'}`);
       }
     });
   }

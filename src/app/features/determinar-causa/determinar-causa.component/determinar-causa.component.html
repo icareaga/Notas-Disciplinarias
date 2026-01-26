@@ -1,4 +1,4 @@
-<app-navigation-buttons></app-navigation-buttons>
+<app-navigation-buttons [backRoute]="'/admin'"></app-navigation-buttons>
 
 <div class="card">
   <h2>2. Determinar la Causa</h2>
@@ -98,8 +98,8 @@
       class="btn-continuar" 
       (click)="continuarProceso()" 
       [disabled]="isLoading || !idPaso2Existente"
-      title="{{ !idPaso2Existente ? 'Debe guardar el Paso 2 primero' : 'Continuar al Paso 3' }}">
-      ➡️ Continuar al Paso 3
+      title="{{ !idPaso2Existente ? 'Debe guardar el Paso 2 primero' : 'Continuar al paso 3' }}">
+      Continuar al paso 3
     </button>
     <button class="btn-terminar" (click)="terminarProceso()" [disabled]="isLoading">
       🛑 Terminar Proceso
@@ -110,11 +110,12 @@
 <!-- Card de cierre de proceso -->
 <div class="card" *ngIf="mostrarTerminarProceso">
   <h3>Justificación de Cierre</h3>
-  <form (ngSubmit)="enviarCierre()">
+  <form [formGroup]="cierreForm" (ngSubmit)="enviarCierre()">
     <div class="form-group">
       <label>Motivo de finalización del proceso*</label>
       <textarea 
-        rows="4" 
+        rows="4"
+        formControlName="justificacion"
         placeholder="Explique por qué se cierra el proceso en esta etapa sin avanzar a los siguientes pasos...">
       </textarea>
     </div>

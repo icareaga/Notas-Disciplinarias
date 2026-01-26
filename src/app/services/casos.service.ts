@@ -3,8 +3,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { CasoCreate } from '../models/caso-create.model';
+import { CasoCierreDto } from '../models/caso-cierre.model';
 import { environment } from '../../environments/environment';
 
 /**
@@ -119,8 +120,8 @@ export class CasosService {
       conducta: caso.conducta,        // ✅ minúscula por JsonPropertyName
       id_usuario_jefe: caso.idUsuarioJefe ?? 0,
       estatus: caso.estatus ?? 1,
-      // Al guardar Paso 1 (Señalar Problema), el caso queda listo para Paso 2
-      id_paso: Math.max(Number(caso.idPaso ?? 1), 2)
+      // Paso 1 NO debe avanzar automáticamente: se crea en Paso 1
+      id_paso: 1
     };
     
     console.log('📤 Enviando (camelCase original):', caso);
@@ -141,10 +142,88 @@ export class CasosService {
       conducta: caso.conducta,
       id_usuario_jefe: caso.idUsuarioJefe ?? 0,
       estatus: caso.estatus ?? 1,
-      id_paso: Math.max(Number(caso.idPaso ?? 1), 2)
+      // En edición preservamos el paso actual enviado por el caller
+      id_paso: Number(caso.idPaso ?? 1) || 1
     };
 
     return this.http.put(`${this.apiUrl}/Casos/${idCaso}`, casoApi);
+  }
+
+  /**
+   * Cierra manualmente un caso (estatus = 0).
+   *
+   * Endpoint preferido (si existe en backend):
+   * - PUT /api/Casos/{idCaso}/cerrar
+   *
+   * Fallback de compatibilidad (si /cerrar no existe):
+   * - PUT /api/Casos/{idCaso} con estatus=0 y el resto de campos.
+   */
+  cerrarCaso(idCaso: number, dto: CasoCierreDto): Observable<any> {
+    const flagKey = 'supports.casos.cerrar';
+    // Si ya detectamos que el backend no expone /cerrar, evitamos el 404 y hacemos fallback directo.
+    if (typeof localStorage !== 'undefined' && localStorage.getItem(flagKey) === 'false') {
+      return this.obtenerCasoPorId(idCaso).pipe(
+        map((caso: any) => {
+          const idUsuario = Number(caso?.id_usuario ?? caso?.IdUsuario ?? caso?.idUsuario ?? 0);
+          const idCategoria = Number(caso?.id_categoria ?? caso?.IdCategoria ?? caso?.idCategoria ?? 0);
+          const idUsuarioJefe = Number(caso?.id_usuario_jefe ?? caso?.IdUsuarioJefe ?? caso?.idUsuarioJefe ?? 0);
+          const idPaso = Number(caso?.id_paso ?? caso?.IdPaso ?? caso?.idPaso ?? 1) || 1;
+
+          return {
+            IdUsuario: idUsuario,
+            id_categoria: idCategoria,
+            descripcion: caso?.descripcion ?? '',
+            impacto: caso?.impacto ?? '',
+            conducta: caso?.conducta ?? '',
+            id_usuario_jefe: idUsuarioJefe,
+            estatus: 0,
+            id_paso: idPaso
+          };
+        }),
+        switchMap((payload) => this.http.put(`${this.apiUrl}/Casos/${idCaso}`, payload))
+      );
+    }
+
+    const urlCerrar = `${this.apiUrl}/Casos/${idCaso}/cerrar`;
+
+    return this.http.put(urlCerrar, dto).pipe(
+      catchError((err) => {
+        // Si el backend no expone /cerrar, intentamos cerrar actualizando el caso.
+        if (err?.status !== 404) {
+          throw err;
+        }
+
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(flagKey, 'false');
+          }
+        } catch {
+          // noop
+        }
+
+        return this.obtenerCasoPorId(idCaso).pipe(
+          map((caso: any) => {
+            const idUsuario = Number(caso?.id_usuario ?? caso?.IdUsuario ?? caso?.idUsuario ?? 0);
+            const idCategoria = Number(caso?.id_categoria ?? caso?.IdCategoria ?? caso?.idCategoria ?? 0);
+            const idUsuarioJefe = Number(caso?.id_usuario_jefe ?? caso?.IdUsuarioJefe ?? caso?.idUsuarioJefe ?? 0);
+            const idPaso = Number(caso?.id_paso ?? caso?.IdPaso ?? caso?.idPaso ?? 1) || 1;
+
+            // Mantener el mapeo de nombres que espera el backend (igual que crear/actualizar).
+            return {
+              IdUsuario: idUsuario,
+              id_categoria: idCategoria,
+              descripcion: caso?.descripcion ?? '',
+              impacto: caso?.impacto ?? '',
+              conducta: caso?.conducta ?? '',
+              id_usuario_jefe: idUsuarioJefe,
+              estatus: 0,
+              id_paso: idPaso
+            };
+          }),
+          switchMap((payload) => this.http.put(`${this.apiUrl}/Casos/${idCaso}`, payload))
+        );
+      })
+    );
   }
 
   /**
