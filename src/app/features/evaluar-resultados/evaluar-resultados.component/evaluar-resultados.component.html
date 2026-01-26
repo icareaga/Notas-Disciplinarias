@@ -1,5 +1,11 @@
+<app-navigation-buttons></app-navigation-buttons>
+
 <div class="card">
   <h2>4. Evaluar Resultados</h2>
+
+  <div *ngIf="errorMensaje" class="error-banner" style="margin-bottom: 12px;">
+    {{ errorMensaje }}
+  </div>
 
   <form [formGroup]="evaluacionForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
@@ -22,24 +28,26 @@
       <textarea formControlName="compromisos" rows="3" placeholder="Definir compromisos nuevos si son necesarios..."></textarea>
     </div>
 
-    <button type="submit" class="btn-guardar">Guardar</button>
+    <button type="submit" class="btn-guardar" [disabled]="isLoading">
+      {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+    </button>
   </form>
 
   <!-- Botones de flujo -->
   <div class="acciones">
-    <button class="btn-continuar" (click)="continuarProceso()">Continuar Proceso</button>
-    <button class="btn-terminar" (click)="terminarProceso()">Terminar Proceso</button>
+    <button class="btn-continuar" (click)="continuarProceso()" [disabled]="isLoading">Continuar Proceso</button>
+    <button class="btn-terminar" (click)="terminarProceso()" [disabled]="isLoading">Terminar Proceso</button>
   </div>
 </div>
 
 <!-- Card de cierre -->
 <div class="card" *ngIf="mostrarTerminarProceso">
   <h3>Justificación de Cierre</h3>
-  <form (ngSubmit)="enviarCierre()">
+  <form [formGroup]="cierreForm" (ngSubmit)="enviarCierre()">
     <div class="form-group">
       <label>Motivo de finalización*</label>
-      <textarea rows="3" placeholder="Explique por qué se cierra el proceso..."></textarea>
+      <textarea rows="3" formControlName="justificacion" placeholder="Explique por qué se cierra el proceso..."></textarea>
     </div>
-    <button type="submit" class="btn-guardar">Enviar Justificación</button>
+    <button type="submit" class="btn-guardar" [disabled]="isLoading">Enviar Justificación</button>
   </form>
 </div>

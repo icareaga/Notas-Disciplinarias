@@ -4,13 +4,13 @@
 
 ### ✅ Requisitos
 - Node.js 18+
-- Angular 17+
+- Angular 20+
 - Visual Studio con backend corriendo en `https://localhost:7199`
 
 ### ✅ Instalación
 ```bash
 npm install
-ng serve
+npm start
 ```
 
 ---
@@ -42,7 +42,8 @@ LoginComponent
 LoginComponent 
   → Click "Ver Mis Notas" 
   → UsuarioComponent 
-  → GET /api/Casos/usuario/{idUsuario} 
+  → GET /api/admin/casos?idUsuario={idUsuario} 
+    (fallback: /api/admin/casos-activos?idUsuario={idUsuario})
   → Muestra lista de notas
 ```
 
@@ -96,7 +97,7 @@ LoginComponent
 ```bash
 # Verifica proxy.conf.json apunta a puerto correcto
 # Verifica que backend corre: https://localhost:7199
-# Reinicia: ng serve
+# Reinicia: npm start
 ```
 
 ### ❌ "No se puede parsear token"

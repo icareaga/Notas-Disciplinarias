@@ -68,13 +68,28 @@ interface UsuarioInfo {
 ```typescript
 export interface CasoCreate {
   /** ID del empleado a quien va la nota */
-  idUsuarioAfectado: number;
-  
-  /** ID/índice de la categoría (tipo de incumplimiento) */
+  idUsuario: number;
+
+  /** ID de la categoría (tipo de incumplimiento) */
   idCategoria: number;
-  
+
   /** Descripción del problema detectado */
   descripcion: string;
+
+  /** Impacto (campo requerido en el flujo actual) */
+  impacto: string;
+
+  /** Conducta observada (campo requerido en el flujo actual) */
+  conducta: string;
+
+  /** ID del jefe que crea la nota (se toma del token) */
+  idUsuarioJefe?: number;
+
+  /** 1 = Activo (por defecto), 0 = Cerrado */
+  estatus?: number;
+
+  /** Paso del flujo (1..6). En la práctica, tras guardar Paso 1, suele quedar listo para Paso 2. */
+  idPaso?: number;
 }
 ```
 
@@ -85,9 +100,11 @@ export interface CasoCreate {
 **Ejemplo**:
 ```json
 {
-  "idUsuarioAfectado": 101,
+  "idUsuario": 101,
   "idCategoria": 15,
-  "descripcion": "El empleado llegó 30 minutos tarde el 15/01/2026 sin justificación"
+  "descripcion": "El empleado llegó 30 minutos tarde el 15/01/2026 sin justificación",
+  "impacto": "Retraso en entrega al cliente",
+  "conducta": "Llegó a las 9:30 AM cuando su hora de entrada es 9:00 AM"
 }
 ```
 
@@ -97,33 +114,46 @@ export interface CasoCreate {
 
 **Ubicación**: Backend (Visual Studio)
 
-**¿Qué es?** La nota disciplinaria guardada en base de datos
+**¿Qué es?** La nota disciplinaria guardada en base de datos.
+
+En este frontend se consumen principalmente respuestas con campos tipo:
+- `id_caso` (ID del caso)
+- `id_usuario` (empleado afectado)
+- `id_usuario_jefe` (jefe creador)
+- `categoria` (nombre)
+- `descripcion`, `impacto`, `conducta`
+- `fecha_registro`
+- `estatus` (1=Activo, 0=Cerrado)
+- `id_paso` (avance del flujo 1..6)
 
 ```typescript
-interface Caso {
-  id: number;                          // ID único de la nota
-  idUsuarioAfectado: number;           // Quién es el afectado
-  idUsuarioCreador: number;            // Quién la creó (jefe)
-  idCategoria: number;                 // Tipo de incumplimiento
-  descripcion: string;                 // Detalles
-  fechaCreacion: string;               // ISO date
-  estado: "activa" | "resuelta" | "archivada";
-  prioridad: "baja" | "media" | "alta";
-  // ... otros campos
+interface CasoApi {
+  id_caso: number;
+  id_usuario: number;
+  id_usuario_jefe: number;
+  categoria: string;
+  descripcion: string;
+  impacto: string;
+  conducta: string;
+  fecha_registro: string;
+  estatus: 0 | 1;
+  id_paso: number;
 }
 ```
 
 **Ejemplo**:
 ```json
 {
-  "id": 999,
-  "idUsuarioAfectado": 101,
-  "idUsuarioCreador": 12345,
-  "idCategoria": 15,
+  "id_caso": 999,
+  "id_usuario": 101,
+  "id_usuario_jefe": 12345,
+  "categoria": "Retardo",
   "descripcion": "Retardo sin justificación",
-  "fechaCreacion": "2026-01-20T14:30:00",
-  "estado": "activa",
-  "prioridad": "media"
+  "impacto": "Retraso en entrega",
+  "conducta": "Llegó 30 minutos tarde",
+  "fecha_registro": "2026-01-20T14:30:00",
+  "estatus": 1,
+  "id_paso": 2
 }
 ```
 

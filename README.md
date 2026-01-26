@@ -14,7 +14,11 @@ npm install
 # (Visual Studio: apunta a https://localhost:7199)
 
 # 3. Inicia Angular
-ng serve
+# Usa el script que ya incluye el proxy (ver proxy.conf.json)
+npm start
+
+# Alternativa equivalente:
+# ng serve --proxy-config proxy.conf.json
 
 # 4. Abre el navegador
 http://localhost:4200
@@ -32,6 +36,10 @@ http://localhost:4200?acces_token=TU_JWT_TOKEN_AQUI
 | **[ARQUITECTURA.md](ARQUITECTURA.md)** | 🏗️ Flujos completos, estructura de carpetas, endpoints |
 | **[GUIA_RAPIDA.md](GUIA_RAPIDA.md)** | ⚡ Debugging, errores comunes, tareas frecuentes |
 | **[DICCIONARIO_DATOS.md](DICCIONARIO_DATOS.md)** | 📋 Estructuras de datos, modelos, validaciones |
+| **[API_ENDPOINTS.md](API_ENDPOINTS.md)** | 📡 Documentación completa de API Backend |
+| **[DEPLOYMENT.md](DEPLOYMENT.md)** | 🚀 Guía de despliegue a producción (IIS, Nginx, Azure) |
+| **[TESTING.md](TESTING.md)** | 🧪 Guía de testing, ejemplos, buenas prácticas |
+| **[CONTRIBUTING.md](CONTRIBUTING.md)** | 🤝 Guía para colaboradores, Git workflow, estándares |
 
 ---
 
@@ -102,7 +110,7 @@ src/app/
 
 ## 🔧 Tecnologías
 
-- **Angular 17** - Framework
+- **Angular 20** - Framework
 - **TypeScript** - Lenguaje
 - **jwt-decode** - Decodificar JWT
 - **RxJS** - Observables (Async)
@@ -116,8 +124,10 @@ src/app/
 ```
 GET    /api/Usuarios/jerarquia/{idUsuario}  → Obtener subordinados
 POST   /api/Casos/crear                     → Crear nota
-GET    /api/Casos/usuario/{idUsuario}       → Ver mis notas
-GET    /api/admin/casos-activos             → Ver todas (admin)
+GET    /api/admin/casos?idUsuario={id}      → Ver mis notas (incluye activos + cerrados)
+GET    /api/admin/casos-activos?idUsuario={id} → Fallback: solo activos
+GET    /api/admin/casos?idJefe={id}         → Ver casos del jefe (incluye activos + cerrados)
+GET    /api/admin/casos-activos?idJefe={id} → Fallback: solo activos
 GET    /api/Categorias                      → Catálogo
 ```
 
@@ -148,7 +158,7 @@ GET    /api/Categorias                      → Catálogo
 ### 3. Prueba el flujo
 ```bash
 # Terminal 1: Angular
-ng serve
+npm start
 
 # Terminal 2: Backend (Visual Studio) en puerto 7199
 
@@ -310,7 +320,7 @@ R: Sí, el backend valida basado en si tienes subordinados
 1. Lee este README (5 min)
 2. Lee [ARQUITECTURA.md](ARQUITECTURA.md) (15 min)
 3. Lee los comentarios en código (20 min)
-4. Ejecuta `ng serve` (2 min)
+4. Ejecuta `npm start` (2 min)
 5. Abre DevTools F12 y prueba (10 min)
 6. ¡Ya estás listo! (Total: ~1 hora)
 

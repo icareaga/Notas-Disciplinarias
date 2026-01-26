@@ -1,39 +1,99 @@
 <div class="page-container">
+  <!-- Componente de navegación reutilizable con botón "Regresar" -->
   <app-navigation-buttons></app-navigation-buttons>
+
+  <!-- Mostrar/Ocultar casos existentes (oculto por defecto) -->
+  <button
+    class="btn-toggle-casos"
+    *ngIf="misCasos.length > 0"
+    (click)="toggleListaCasos()">
+    {{ mostrarListaCasos ? 'Ocultar casos' : ('Ver casos existentes (' + misCasos.length + ')') }}
+  </button>
+  
+  <!-- Tabla de casos existentes -->
+  <div class="card casos-lista" *ngIf="mostrarListaCasos && misCasos.length > 0">
+    <div class="casos-header">
+      <h3>📋 Casos</h3>
+      <button class="btn-actualizar" (click)="recargarCasos()" title="Actualizar lista">
+        🔄 Actualizar
+      </button>
+    </div>
+    <table class="casos-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Colaborador</th>
+          <th>Descripción</th>
+          <th>Paso Actual</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let caso of misCasos" (click)="seleccionarCaso(caso)" class="caso-row">
+          <td>{{ caso.id_caso }}</td>
+          <td>{{ getNombreEmpleado(caso.id_usuario) }}</td>
+          <td class="descripcion-cell">{{ caso.descripcion | slice:0:50 }}{{ caso.descripcion.length > 50 ? '...' : '' }}</td>
+          <td>
+            <span class="badge-paso paso-{{ caso.id_paso || 1 }}">
+              Paso {{ caso.id_paso || 1 }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-accion" (click)="seleccionarCaso(caso); $event.stopPropagation()">
+              {{ caso.id_paso < 6 ? '➡️ Avanzar' : '📝 Editar' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   
   <div class="card">
-    <h2>1. Señalar el Problema</h2>
+    <h2>{{ modoEdicion ? '📝 Editar Caso #' + idCasoActual : '1. Señalar el Problema' }}</h2>
+    
+    <!-- Botón cancelar edición -->
+    <button *ngIf="modoEdicion" (click)="cancelarEdicion()" class="btn-cancelar">
+      ❌ Cancelar Edición
+    </button>
 
-  <!-- Colaborador -->
+  <!-- Campo 1: Selección de colaborador afectado -->
+  <!-- Carga dinámicamente los empleados subordinados del jefe desde la API -->
   <label>Colaborador:</label>
   <select [(ngModel)]="nuevoCaso.idUsuario" [compareWith]="compareNumbers">
     <option [ngValue]="0">Seleccione un colaborador</option>
+    <!-- Itera sobre empleados obtenidos de /api/Usuarios/jerarquia/{jefeId} -->
     <option *ngFor="let e of empleados" [ngValue]="e.id">
       {{ e.nombre_Completo }}
     </option>
   </select>
 
-  <!-- Categoría -->
+  <!-- Campo 2: Tipo de incumplimiento/falta -->
+  <!-- Ejemplos: Retardo, Falta Injustificada, Baja Productividad, etc. -->
   <label>Categoría:</label>
   <select [(ngModel)]="nuevoCaso.idCategoria" [compareWith]="compareNumbers">
     <option [ngValue]="0">Seleccione una categoría</option>
+    <!-- Itera sobre categorías obtenidas de /api/Categorias -->
+    <!-- getCategoriaId normaliza diferentes formatos de ID del backend -->
     <option *ngFor="let c of categorias" [ngValue]="getCategoriaId(c)">
       {{ c.nombre }}
     </option>
   </select>
 
-  <!-- Descripción -->
+  <!-- Campo 3: Descripción detallada de QUÉ pasó -->
   <label>Descripción del problema:</label>
   <textarea rows="4" [(ngModel)]="nuevoCaso.descripcion" placeholder="Describe la situación detectada"></textarea>
 
-  <!-- Impacto -->
+  <!-- Campo 4: Impacto del incumplimiento en la operación/empresa -->
   <label>Impacto en la empresa:</label>
   <textarea rows="4" [(ngModel)]="nuevoCaso.impacto" placeholder="¿Cuál fue el impacto de esta conducta en la empresa?"></textarea>
 
-  <!-- Conducta -->
+  <!-- Campo 5: Descripción específica de la conducta observada -->
   <label>Conducta observada:</label>
   <textarea rows="4" [(ngModel)]="nuevoCaso.conducta" placeholder="Describe en detalle la conducta que observaste"></textarea>
 
-  <button (click)="crearCaso()">Guardar</button>
+  <!-- Botón de guardado: ejecuta validaciones y envía POST a /api/Casos/crear -->
+  <button (click)="crearCaso()">
+    {{ modoEdicion ? '💾 Actualizar Caso' : '💾 Guardar Caso' }}
+  </button>
   </div>
 </div>

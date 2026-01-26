@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
  
 import { CasoCreate } from '../../../models/caso-create.model';
 import { Categoria } from '../../../models/categoria.model';
@@ -23,14 +24,20 @@ import { NavigationButtonsComponent } from '../../../shared/navigation-buttons/n
 @Component({
   selector: 'app-senalar-problema',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavigationButtonsComponent],
+  imports: [CommonModule, NgIf, NgFor, FormsModule, NavigationButtonsComponent],
   templateUrl: './senalar-problema.component.html',
   styleUrls: ['./senalar-problema.component.scss']
 })
-export class SenalarProblemaComponent implements OnInit {
+export class SenalarProblemaComponent implements OnInit, OnDestroy {
  
   empleados: any[] = [];
   categorias: Categoria[] = [];
+  misCasos: any[] = []; // Lista de casos creados por el jefe
+  mostrarListaCasos = false;
+  modoEdicion = false; // Si está editando un caso existente
+  idCasoActual: number = 0; // ID del caso que se está editando
+  private routerSubscription?: Subscription; // Para detectar cuando regresas a esta vista
+  
   nuevoCaso: CasoCreate = {
     idUsuario: 0,
     idCategoria: 0,
@@ -47,7 +54,25 @@ export class SenalarProblemaComponent implements OnInit {
     private categoriasService: CategoriasService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    // Detectar cuando regresas a esta vista desde otra ruta
+    this.routerSubscription = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      // Si estamos en la ruta de senalar-problema, recargar casos
+      if (this.router.url.includes('/senalar-problema')) {
+        const tokenInfo = this.authService.getTokenInfo();
+        const idJefe = tokenInfo?.Id || tokenInfo?.UserId || (tokenInfo as any)?.['id'];
+        if (idJefe) {
+          this.cargarMisCasos(String(idJefe));
+        }
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSubscription?.unsubscribe();
+  }
 
   compareNumbers(o1: any, o2: any): boolean {
     return o1 === o2;
@@ -55,6 +80,14 @@ export class SenalarProblemaComponent implements OnInit {
 
   getCategoriaId(categoria: any): number {
     return categoria.id_Categoria || categoria.Id_Categoria || categoria.idCategoria || 0;
+  }
+
+  /**
+   * Obtiene el nombre del empleado por ID
+   */
+  getNombreEmpleado(idUsuario: number): string {
+    const empleado = this.empleados.find(e => e.id === idUsuario);
+    return empleado?.nombre_Completo || 'N/A';
   }
 
   regresarAlInicio(): void {
@@ -119,8 +152,187 @@ export class SenalarProblemaComponent implements OnInit {
         console.error('❌ Error al cargar jerarquía:', err);
       }
     });
+
+    // Cargar casos creados por este jefe
+    this.cargarMisCasos(idUsuario);
   }
 
+  /**
+   * Carga los casos creados por el jefe actual
+   */
+  cargarMisCasos(idJefe: string): void {
+    this.casosService.obtenerCasos().subscribe({
+      next: (data: any[]) => {
+        // Filtrar solo los casos de este jefe
+        this.misCasos = data.filter(c => c.id_usuario_jefe === Number(idJefe));
+        console.log('📋 Mis casos cargados:', this.misCasos.length);
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar casos:', err);
+      }
+    });
+  }
+
+  /**
+   * Recarga manualmente la lista de casos
+   * Útil cuando regresas de editar un paso
+   */
+  recargarCasos(): void {
+    const tokenInfo = this.authService.getTokenInfo();
+    const idJefe = tokenInfo?.Id || tokenInfo?.UserId || (tokenInfo as any)?.['id'];
+    if (idJefe) {
+      console.log('🔄 Recargando casos...');
+      this.cargarMisCasos(String(idJefe));
+    }
+  }
+
+  toggleListaCasos(): void {
+    this.mostrarListaCasos = !this.mostrarListaCasos;
+  }
+
+  /**
+   * Selecciona un caso para editar o avanzar al siguiente paso
+   */
+  seleccionarCaso(caso: any): void {
+    const idPaso = caso.id_paso || 1;
+    const nombreEmpleado = this.getNombreEmpleado(caso.id_usuario);
+    
+    // Determinar el siguiente paso
+    const pasoSiguiente = idPaso + 1;
+    const nombresPasos: { [key: number]: string } = {
+      1: 'Señalar Problema',
+      2: 'Determinar Causa',
+      3: 'Plan de Acción',
+      4: 'Evaluar Resultados',
+      5: 'Nota de Incumplimiento',
+      6: 'Acta Administrativa'
+    };
+
+    const mensaje = idPaso < 6 
+      ? `Caso #${caso.id_caso} - ${nombreEmpleado}\n\nPaso actual: ${nombresPasos[idPaso]}\n\n¿Deseas avanzar al siguiente paso?\n(${nombresPasos[pasoSiguiente]})`
+      : `Caso #${caso.id_caso} - ${nombreEmpleado}\n\nEl caso está en el último paso.\n\n¿Deseas editarlo?`;
+
+    if (confirm(mensaje)) {
+      if (idPaso < 6) {
+        // Navegar al siguiente paso
+        this.navegarAPaso(caso.id_caso, pasoSiguiente);
+      } else {
+        // Editar el último paso
+        this.navegarAPaso(caso.id_caso, idPaso);
+      }
+    } else {
+      // Usuario canceló, preguntar si quiere editar el paso actual
+      if (confirm(`¿Deseas editar el paso actual (${nombresPasos[idPaso]})?`)) {
+        if (idPaso === 1) {
+          // Si es paso 1, editar en esta misma vista
+          this.editarCaso(caso);
+        } else {
+          // Para otros pasos, navegar a su componente
+          this.navegarAPaso(caso.id_caso, idPaso);
+        }
+      }
+    }
+  }
+
+  /**
+   * Navega al paso correspondiente según el id_paso
+   */
+  navegarAPaso(idCaso: number, paso: number): void {
+    const rutas: { [key: number]: string } = {
+      1: '/senalar-problema',
+      2: '/determinar-causa',
+      3: '/plan-accion',
+      4: '/evaluar-resultados',
+      5: '/nota-incumplimiento',
+      6: '/acta-administrativa'
+    };
+
+    const ruta = rutas[paso] || '/senalar-problema';
+    this.router.navigate([ruta], { queryParams: { idCaso } });
+  }
+
+  /**
+   * Edita el caso actual (Paso 1)
+   */
+  editarCaso(caso: any): void {
+    this.modoEdicion = true;
+    this.idCasoActual = caso.id_caso;
+    
+    // Cargar datos en el formulario
+    this.nuevoCaso = {
+      idUsuario: caso.id_usuario,
+      idCategoria: caso.id_categoria,
+      descripcion: caso.descripcion,
+      impacto: caso.impacto,
+      conducta: caso.conducta,
+      idUsuarioJefe: caso.id_usuario_jefe,
+      estatus: caso.estatus,
+      idPaso: caso.id_paso
+    };
+
+    console.log('📝 Editando caso:', this.idCasoActual);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /**
+   * Cancela la edición y limpia el formulario
+   */
+  cancelarEdicion(): void {
+    this.modoEdicion = false;
+    this.idCasoActual = 0;
+    this.nuevoCaso = {
+      idUsuario: 0,
+      idCategoria: 0,
+      descripcion: '',
+      impacto: '',
+      conducta: '',
+      idUsuarioJefe: this.nuevoCaso.idUsuarioJefe,
+      estatus: 1,
+      idPaso: 1
+    };
+  }
+
+  /**
+   * MÉTODO PRINCIPAL: Crea una nueva nota disciplinaria
+   * 
+   * Este método se ejecuta cuando el jefe presiona el botón "Guardar".
+   * Realiza validaciones exhaustivas antes de enviar al backend.
+   * 
+   * PROCESO COMPLETO:
+   * 1. VALIDACIÓN DE CAMPOS OBLIGATORIOS:
+   *    - idUsuario (empleado seleccionado)
+   *    - idCategoria (tipo de falta)
+   *    - descripcion (qué pasó)
+   *    - impacto (consecuencias)
+   *    - conducta (comportamiento observado)
+   * 
+   * 2. VALIDACIÓN DE INTEGRIDAD:
+   *    - Verifica que la categoría existe en el catálogo
+   *    - Evita IDs inválidos o inexistentes
+   * 
+   * 3. PREPARACIÓN DE DATOS:
+   *    - Fuerza idPaso = 1 (siempre inicia en paso 1 de 6)
+   *    - Agrega idUsuarioJefe automáticamente
+   *    - Convierte formato camelCase a snake_case para API .NET
+   * 
+   * 4. ENVÍO AL BACKEND:
+   *    - POST /api/Casos/crear
+   *    - Espera confirmación del servidor
+   * 
+   * 5. MANEJO DE RESPUESTA:
+   *    - Éxito: Muestra alerta, resetea formulario
+   *    - Error: Muestra mensaje detallado del error
+   * 
+   * VALIDACIONES IMPLEMENTADAS:
+   * - Campos no vacíos (trim())
+   * - Categoría existe en el array categorias[]
+   * - IDs son números válidos
+   * 
+   * LOGS PARA DEBUGGING:
+   * - Estado de cada campo antes de validar
+   * - Caso completo antes de enviar
+   * - Respuesta del servidor (éxito o error)
+   */
   crearCaso(): void {
     console.log('🔍 ANTES DE VALIDAR:');
     console.log('  idUsuario:', this.nuevoCaso.idUsuario, typeof this.nuevoCaso.idUsuario);
@@ -149,29 +361,53 @@ export class SenalarProblemaComponent implements OnInit {
       return;
     }
 
-    // FORZAR id_paso a 1 (siempre inicia en paso 1 de 6)
-    this.nuevoCaso.idPaso = 1;
-    
-    // FORZAR id_paso a 1 (siempre inicia en paso 1 de 6)
-    this.nuevoCaso.idPaso = 1;
+    // Regla de avance: al guardar Paso 1, el caso queda listo para Paso 2.
+    // Si estamos editando un caso que ya avanzó más, NO regresarlo; mantener el paso actual.
+    const idPasoActual = Number(this.nuevoCaso.idPaso ?? 1);
+    this.nuevoCaso.idPaso = Math.max(idPasoActual, 2);
     
     console.log('📤 ENVIANDO CASO COMPLETO:', this.nuevoCaso);
     console.log('✅ Categoría verificada:', categoriaExiste.nombre);
-    console.log('✅ idPaso FORZADO a 1:', this.nuevoCaso.idPaso);
-    console.log('✅ idPaso FORZADO a 1:', this.nuevoCaso.idPaso);
-    
+    console.log('✅ idPaso calculado (mín. 2):', this.nuevoCaso.idPaso);
+
+    const tokenInfo = this.authService.getTokenInfo();
+    const idJefe = String(tokenInfo?.Id || tokenInfo?.UserId);
+
+    if (this.modoEdicion && this.idCasoActual > 0) {
+      this.casosService.actualizarCasoPaso1(this.idCasoActual, this.nuevoCaso).subscribe({
+        next: (respuesta: any) => {
+          console.log('✅ Caso actualizado:', respuesta);
+          alert('Caso actualizado correctamente');
+
+          // Salir de edición y recargar lista
+          this.cancelarEdicion();
+          this.cargarMisCasos(idJefe);
+        },
+        error: (err) => {
+          console.error('❌ Error al actualizar caso:', err);
+          alert(`Error al actualizar el caso: ${err.error?.message || err.statusText || 'Error desconocido'}`);
+        }
+      });
+      return;
+    }
+
     this.casosService.crearCaso(this.nuevoCaso).subscribe({
       next: (respuesta: any) => {
         console.log('✅ Caso creado:', respuesta);
         alert('Caso creado correctamente');
-        this.nuevoCaso = { 
-          idUsuario: 0, 
-          idCategoria: 0, 
-          descripcion: '', 
-          impacto: '', 
+
+        this.cargarMisCasos(idJefe);
+
+        // Limpiar formulario
+        this.nuevoCaso = {
+          idUsuario: 0,
+          idCategoria: 0,
+          descripcion: '',
+          impacto: '',
           conducta: '',
           idUsuarioJefe: this.nuevoCaso.idUsuarioJefe,
-          estatus: 1
+          estatus: 1,
+          idPaso: 2
         };
       },
       error: (err) => {

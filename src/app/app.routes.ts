@@ -6,8 +6,8 @@ import { NotaIncumplimientoComponent } from './features/nota-incumplimiento/nota
 import { EvaluarResultadosComponent } from './features/evaluar-resultados/evaluar-resultados.component/evaluar-resultados.component';
 import { DeterminarCausaComponent } from './features/determinar-causa/determinar-causa.component/determinar-causa.component';
 import { ActaAdministrativaComponent } from './features/acta-administrativa/acta-administrativa.component/acta-administrativa.component';
-import { UsuarioComponent } from './features/usuario//usuario/usuario.component';
-import { AdminComponent } from './features/admin//admin/admin.component';
+import { UsuarioComponent } from './features/usuario/usuario/usuario.component';
+import { AdminComponent } from './features/admin/admin/admin.component';
 
 import { LoginComponent } from './features/login/login.component';
 

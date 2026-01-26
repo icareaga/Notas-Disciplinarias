@@ -1,5 +1,11 @@
+<app-navigation-buttons></app-navigation-buttons>
+
 <div class="card">
-  <h2>3. Establecer Plan de Acción</h2>
+  <h2>Paso 3. Establecer Plan de Acción</h2>
+
+  <div *ngIf="errorMensaje" style="margin: 10px 0; padding: 10px; border: 1px solid #c62828; background: #ffebee; color:#b71c1c; border-radius:6px;">
+    {{ errorMensaje }}
+  </div>
 
   <form [formGroup]="planForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
@@ -22,13 +28,15 @@
       <textarea formControlName="documentacion" rows="3" placeholder="Lista de asistencia, certificados..."></textarea>
     </div>
 
-    <button type="submit" class="btn-guardar">Guardar</button>
+    <button type="submit" class="btn-guardar" [disabled]="isLoading">
+      {{ isLoading ? 'Guardando…' : (modoEdicion ? 'Actualizar' : 'Guardar') }}
+    </button>
   </form>
 
   <!-- Botones de flujo -->
   <div class="acciones">
-    <button class="btn-continuar" (click)="continuarProceso()">Continuar Proceso</button>
-    <button class="btn-terminar" (click)="terminarProceso()">Terminar Proceso</button>
+    <button class="btn-continuar" (click)="continuarProceso()" [disabled]="isLoading">Continuar Proceso</button>
+    <button class="btn-terminar" (click)="terminarProceso()" [disabled]="isLoading">Terminar Proceso</button>
   </div>
 </div>
 

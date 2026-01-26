@@ -5,11 +5,81 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   margin: 20px auto;
   max-width: 700px;
+  position: relative; // Para el badge de modo
 }
 
 h2 {
   color: #0046ad; // Azul corporativo
   margin-bottom: 15px;
+  display: inline-block;
+}
+
+// Información del caso
+.caso-info {
+  background: #f8f9fa;
+  border-left: 4px solid #0046ad;
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 6px;
+
+  h3 {
+    color: #0046ad;
+    font-size: 16px;
+    margin: 0 0 12px 0;
+  }
+
+  .info-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .info-item {
+    strong {
+      display: block;
+      color: #555;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 0;
+      padding: 8px;
+      background: white;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #333;
+      border: 1px solid #e0e0e0;
+    }
+  }
+}
+
+// Badge de modo (Editando/Nuevo)
+.badge-modo {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 15px;
+  background: #ffa500;
+  color: white;
+  
+  &.nuevo {
+    background: #28a745;
+  }
+}
+
+// Alertas
+.alert {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  
+  &.alert-error {
+    background: #ffe6e6;
+    border: 1px solid #ff4444;
+    color: #c62828;
+  }
 }
 
 .form-group {
@@ -35,6 +105,100 @@ h2 {
       border-color: #0046ad;
       box-shadow: 0 0 4px rgba(0, 70, 173, 0.5);
     }
+
+    &.invalid {
+      border-color: #ff4444;
+    }
+  }
+
+  .hint-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .error-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #c62828;
+  }
+}
+
+// Input de archivos
+.file-input {
+  padding: 8px;
+  background: #f5f5f5;
+  cursor: pointer;
+  
+  &:hover {
+    background: #e8e8e8;
+  }
+}
+
+// Lista de archivos seleccionados
+.archivos-lista {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+
+  h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .archivo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: white;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    border: 1px solid #e0e0e0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .archivo-icon {
+      font-size: 18px;
+    }
+
+    .archivo-nombre {
+      flex: 1;
+      font-size: 13px;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .archivo-tamano {
+      font-size: 12px;
+      color: #666;
+      min-width: 70px;
+      text-align: right;
+    }
+
+    .btn-eliminar-archivo {
+      background: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #cc0000;
+      }
+    }
   }
 }
 
@@ -46,11 +210,16 @@ button {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   &.btn-guardar {
     background: #0046ad;
     color: white;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: #003a8c;
     }
   }
@@ -60,7 +229,7 @@ button {
     color: white;
     margin-right: 10px;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: #006400;
     }
   }
@@ -69,7 +238,7 @@ button {
     background: #c62828;
     color: white;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: #a00000;
     }
   }

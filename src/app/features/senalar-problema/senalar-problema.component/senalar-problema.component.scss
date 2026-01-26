@@ -1,9 +1,151 @@
 $megacable-blue: #0047bb;
 
 .page-container {
-  max-width: 700px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.btn-toggle-casos {
+  background: transparent;
+  color: $megacable-blue;
+  border: 1px solid rgba(0, 71, 187, 0.35);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 14px;
+  transition: background 0.2s, border-color 0.2s;
+
+  &:hover {
+    background: rgba(0, 71, 187, 0.06);
+    border-color: rgba(0, 71, 187, 0.55);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+// Tabla de casos
+.casos-lista {
+  margin-bottom: 30px;
+  max-width: 100%;
+
+  .casos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+
+    h3 {
+      color: $megacable-blue;
+      margin: 0;
+    }
+
+    .btn-actualizar {
+      background: $megacable-blue;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+
+      &:hover {
+        background: darken($megacable-blue, 10%);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+  }
+}
+
+.casos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  thead {
+    background: $megacable-blue;
+    color: white;
+
+    th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+  }
+
+  tbody {
+    .caso-row {
+      border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #f5f8ff;
+      }
+
+      td {
+        padding: 12px;
+      }
+
+      .descripcion-cell {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+.badge-paso {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+
+  &.paso-1 { background: #4caf50; }
+  &.paso-2 { background: #2196f3; }
+  &.paso-3 { background: #ff9800; }
+  &.paso-4 { background: #9c27b0; }
+  &.paso-5 { background: #f44336; }
+  &.paso-6 { background: #607d8b; }
+}
+
+.btn-accion {
+  padding: 6px 12px;
+  background: $megacable-blue;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+
+  &:hover {
+    background: #003a9c;
+  }
+}
+
+.btn-cancelar {
+  background: #f44336;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 15px;
+
+  &:hover {
+    background: #d32f2f;
+  }
 }
 
 .card {

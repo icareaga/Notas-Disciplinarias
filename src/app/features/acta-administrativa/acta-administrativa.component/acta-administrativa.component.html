@@ -1,49 +1,41 @@
-<div class="card">
-  <h2>6. Acta Administrativa</h2>
+<app-navigation-buttons></app-navigation-buttons>
 
-  <p><strong>¿Qué es?</strong></p>
-  <p>
-    Documento oficial que registra una falta grave o recurrente, con implicaciones legales o disciplinarias.
-  </p>
+<div class="form-container">
+  <h2>Acta Administrativa (Paso 6)</h2>
 
-  <p><strong>¿Cómo hacerlo?</strong></p>
-  <ul>
-    <li>Redactar un acta donde se detalle el historial del caso (todos los pasos anteriores).</li>
-    <li>Presentar fechas, evidencias y acciones tomadas. Incluir la versión del colaborador.</li>
-    <li>Firmar por ambas partes (jefe, colaborador y testigo si aplica).</li>
-    <li>Archivar en el expediente.</li>
-  </ul>
+  <div *ngIf="errorMensaje" class="alert-error">{{ errorMensaje }}</div>
 
-  <!-- Formulario del acta -->
-  <form>
+  <form [formGroup]="actaForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
-      <label for="colaborador">Colaborador*</label>
-      <input type="text" id="colaborador" name="colaborador" placeholder="Ejemplo: Juan Pérez" required />
+      <label for="colaborador">Colaborador</label>
+      <input id="colaborador" type="text" formControlName="colaborador" placeholder="Nombre del colaborador" />
+      <small *ngIf="actaForm.get('colaborador')?.touched && actaForm.get('colaborador')?.invalid">Campo requerido</small>
     </div>
 
     <div class="form-group">
-      <label for="historial">Historial del caso*</label>
-      <textarea id="historial" name="historial" rows="3" placeholder="Describe los pasos anteriores..." required></textarea>
+      <label for="historial">Historial</label>
+      <textarea id="historial" formControlName="historial" placeholder="Describe el historial"></textarea>
+      <small *ngIf="actaForm.get('historial')?.touched && actaForm.get('historial')?.invalid">Campo requerido</small>
     </div>
 
     <div class="form-group">
-      <label for="evidencias">Fechas y evidencias</label>
-      <textarea id="evidencias" name="evidencias" rows="3" placeholder="Adjunta fechas y evidencias relevantes"></textarea>
+      <label for="evidencias">Evidencias</label>
+      <textarea id="evidencias" formControlName="evidencias" placeholder="Describe las evidencias"></textarea>
     </div>
 
     <div class="form-group">
       <label for="versionColaborador">Versión del colaborador</label>
-      <textarea id="versionColaborador" name="versionColaborador" rows="3" placeholder="Escribe la versión del colaborador"></textarea>
+      <textarea id="versionColaborador" formControlName="version_colaborador" placeholder="Versión del colaborador"></textarea>
     </div>
 
     <div class="form-group">
-      <label for="firmas">Firmas (jefe, colaborador, testigo)</label>
-      <textarea id="firmas" name="firmas" rows="2" placeholder="Incluye las firmas correspondientes"></textarea>
+      <label for="firmas">Firmas</label>
+      <input id="firmas" type="text" formControlName="firmas" placeholder="Firmas" />
     </div>
 
-    <div class="form-buttons">
-      <button type="submit" class="btn-guardar">Guardar Acta</button>
-      <button type="button" class="btn-cancelar">Cancelar</button>
+    <div class="button-group">
+      <button type="submit" [disabled]="isLoading">{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</button>
+      <button type="button" class="cancel" (click)="finalizarProceso()" [disabled]="isLoading">Completar (cierra el caso)</button>
     </div>
   </form>
 </div>

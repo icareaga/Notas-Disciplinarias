@@ -75,13 +75,30 @@ export class AppComponent implements OnInit {
   }
 
   /**
-   * Verifica si hay un token en la URL (enviado por ItGov)
-   * Si existe y no está guardado, lo guarda y redirige a login
+   * MÉTODO CLAVE: Captura y procesa el token JWT enviado por ItGov
    * 
-   * Intenta múltiples nombres de query parameter:
-   * - acces_token (nombre de ItGov)
-   * - access_token (estándar)
-   * - token (fallback)
+   * Este método es el corazón de la autenticación SSO (Single Sign-On).
+   * Se ejecuta cada vez que la página carga o el usuario navega.
+   * 
+   * PROCESO:
+   * 1. Lee los query parameters de la URL actual
+   * 2. Busca el token en múltiples nombres posibles (acces_token, access_token, token)
+   * 3. Si encuentra un token Y no hay uno guardado previamente:
+   *    - Guarda el token en localStorage
+   *    - Decodifica el JWT para extraer datos del usuario
+   *    - Guarda los datos del usuario en localStorage
+   *    - Redirige a /login para mostrar bienvenida
+   *    - Limpia la URL (quita el token por seguridad)
+   * 
+   * NOTAS DE SEGURIDAD:
+   * - Solo procesa el token si NO hay uno guardado (evita reemplazos no deseados)
+   * - Limpia inmediatamente la URL para que el token no quede visible
+   * - Los datos se guardan en localStorage (accesible solo desde este dominio)
+   * 
+   * NOMBRES DE QUERY PARAM SOPORTADOS:
+   * - acces_token: Nombre usado por ItGov (con typo intencional)
+   * - access_token: Nombre estándar OAuth
+   * - token: Nombre genérico fallback
    */
   private checkTokenInUrl() {
     const urlParams = new URLSearchParams(window.location.search);

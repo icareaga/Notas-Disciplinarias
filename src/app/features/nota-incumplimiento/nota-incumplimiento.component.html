@@ -1,7 +1,13 @@
+<app-navigation-buttons></app-navigation-buttons>
+
 <div class="nota-wrapper">
   <!-- Card principal -->
   <div class="card">
     <h2>5. Nota de Incumplimiento</h2>
+
+    <div *ngIf="errorMensaje" class="error-banner" style="margin-bottom: 12px;">
+      {{ errorMensaje }}
+    </div>
 
     <p><strong>¿Qué es?</strong></p>
     <p>
@@ -39,17 +45,17 @@
       <!-- Fila de botones, igual que en Evaluar Resultados -->
       <div class="acciones">
         <!-- Izquierda: Guardar -->
-        <button type="submit" class="btn-guardar">
-          Guardar
+        <button type="submit" class="btn-guardar" [disabled]="isLoading">
+          {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
         </button>
 
         <!-- Derecha: Continuar / Terminar -->
         <div class="acciones-derecha">
-          <button type="button" class="btn-continuar" (click)="continuarProceso()">
+          <button type="button" class="btn-continuar" (click)="continuarProceso()" [disabled]="isLoading">
             Continuar Proceso
           </button>
 
-          <button type="button" class="btn-terminar" (click)="terminarProceso()">
+          <button type="button" class="btn-terminar" (click)="terminarProceso()" [disabled]="isLoading">
             Terminar Proceso
           </button>
         </div>
@@ -61,13 +67,13 @@
   <div class="card" *ngIf="mostrarTerminarProceso">
     <h3>Justificación de Cierre</h3>
 
-    <form (ngSubmit)="enviarCierre()">
+    <form [formGroup]="cierreForm" (ngSubmit)="enviarCierre()">
       <div class="form-group">
         <label>Motivo de finalización*</label>
-        <textarea rows="3" placeholder="Explique por qué se cierra el proceso..."></textarea>
+        <textarea rows="3" formControlName="justificacion" placeholder="Explique por qué se cierra el proceso..."></textarea>
       </div>
 
-      <button type="submit" class="btn-guardar">Enviar Justificación</button>
+      <button type="submit" class="btn-guardar" [disabled]="isLoading">Enviar Justificación</button>
     </form>
   </div>
 </div>

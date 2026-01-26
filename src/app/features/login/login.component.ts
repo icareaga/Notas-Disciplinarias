@@ -52,7 +52,8 @@ export class LoginComponent implements OnInit {
     // 1. Primero verificar si viene token desde ItGov en la URL
     this.route.queryParams.subscribe(params => {
       console.log('🔍 Query params recibidos:', params);
-      const token = params['acces_token'];
+      // ItGov históricamente ha usado `acces_token` (con typo). También soportamos variantes.
+      const token = params['acces_token'] ?? params['access_token'] ?? params['token'];
       
       if (token) {
         console.log('🔑 Token recibido desde ItGov:', token.substring(0, 20) + '...');

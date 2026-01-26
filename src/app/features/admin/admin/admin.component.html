@@ -1,3 +1,4 @@
+        
 
 <div class="admin-container">
 
@@ -11,9 +12,14 @@
 
   <!-- Barra de acciones: Exportar + Filtros -->
   <div class="header-toolbar">
-    <button class="btn-excel" (click)="exportarExcel()">
-    Exportar Excel
-    </button>
+    <div class="toolbar-left">
+      <button class="btn-excel" (click)="exportarExcel()">
+        Exportar Excel
+      </button>
+      <button class="btn-actualizar" (click)="recargarCasos()" title="Actualizar lista">
+        🔄 Actualizar
+      </button>
+    </div>
 
     <div class="filtros">
       <button
@@ -29,7 +35,7 @@
         [class.activo]="filtroEstado === 'SENALAR_PROBLEMA'"
         (click)="setFiltro('SENALAR_PROBLEMA')"
       >
-        Señalar Problema <span class="badge">{{ conteos.senalarProblema }}</span>
+        Paso 1: Señalar Problema <span class="badge">{{ conteos.senalarProblema }}</span>
       </button>
 
       <button
@@ -37,7 +43,7 @@
         [class.activo]="filtroEstado === 'DETERMINAR_CAUSA'"
         (click)="setFiltro('DETERMINAR_CAUSA')"
       >
-        Determinar Causa <span class="badge">{{ conteos.determinarCausa }}</span>
+        Paso 2: Determinar Causa <span class="badge">{{ conteos.determinarCausa }}</span>
       </button>
 
       <button
@@ -45,7 +51,7 @@
         [class.activo]="filtroEstado === 'PLAN_ACCION'"
         (click)="setFiltro('PLAN_ACCION')"
       >
-        Plan de Acción <span class="badge">{{ conteos.planAccion }}</span>
+        Paso 3: Plan de Acción <span class="badge">{{ conteos.planAccion }}</span>
       </button>
 
       <button
@@ -53,7 +59,7 @@
         [class.activo]="filtroEstado === 'EVALUAR_RESULTADOS'"
         (click)="setFiltro('EVALUAR_RESULTADOS')"
       >
-        Evaluar Resultados <span class="badge">{{ conteos.evaluarResultados }}</span>
+        Paso 4: Evaluar Resultados <span class="badge">{{ conteos.evaluarResultados }}</span>
       </button>
 
       <button
@@ -61,7 +67,7 @@
         [class.activo]="filtroEstado === 'NOTA_INCUMPLIMIENTO'"
         (click)="setFiltro('NOTA_INCUMPLIMIENTO')"
       >
-        Nota Incumplimiento <span class="badge">{{ conteos.notaIncumplimiento }}</span>
+        Paso 5: Nota Incumplimiento <span class="badge">{{ conteos.notaIncumplimiento }}</span>
       </button>
 
       <button
@@ -69,7 +75,7 @@
         [class.activo]="filtroEstado === 'ACTA_ADMINISTRATIVA'"
         (click)="setFiltro('ACTA_ADMINISTRATIVA')"
       >
-        Acta Administrativa <span class="badge">{{ conteos.actaAdministrativa }}</span>
+        Paso 6: Acta Administrativa <span class="badge">{{ conteos.actaAdministrativa }}</span>
       </button>
     </div>
   </div>
@@ -93,7 +99,7 @@
         <th class="col-levantado">Levantado por</th>
         <th class="col-paso">Paso actual</th>
         <th class="col-estatus">Estatus</th>
-        <th class="col-fecha">Fecha</th>
+        <th class="col-fecha">Fecha de creación</th>
         <th class="col-acciones">Acciones</th>
       </tr>
     </thead>
@@ -117,11 +123,18 @@
         </td>
         <td class="col-fecha">{{ c.fecha | date:'yyyy-MM-dd' }}</td>
         <td class="col-acciones">
-          <button class="btn-ver" (click)="verCaso(c)" title="Ver detalle">
+          <button
+            class="btn-ver"
+            (click)="verCaso(c)"
+            [attr.title]="c.estatusCaso === 1 ? 'Ver detalle' : 'Ver detalle (solo lectura)'">
             <svg width="14" height="14" fill="currentColor" viewBox="0 0 32 32"><path d="M0 16q0.064 0.128 0.16 0.352t0.48 0.928 0.832 1.344 1.248 1.536 1.664 1.696 2.144 1.568 2.624 1.344 3.136 0.896 3.712 0.352 3.712-0.352 3.168-0.928 2.592-1.312 2.144-1.6 1.664-1.632 1.248-1.6 0.832-1.312 0.48-0.928l0.16-0.352q-0.032-0.128-0.16-0.352t-0.48-0.896-0.832-1.344-1.248-1.568-1.664-1.664-2.144-1.568-2.624-1.344-3.136-0.896-3.712-0.352-3.712 0.352-3.168 0.896-2.592 1.344-2.144 1.568-1.664 1.664-1.248 1.568-0.832 1.344-0.48 0.928zM10.016 16q0-2.464 1.728-4.224t4.256-1.76 4.256 1.76 1.76 4.224-1.76 4.256-4.256 1.76-4.256-1.76-1.728-4.256zM12 16q0 1.664 1.184 2.848t2.816 1.152 2.816-1.152 1.184-2.848-1.184-2.816-2.816-1.184-2.816 1.184l2.816 2.816h-4z"/></svg>
             Ver
           </button>
-          <button class="btn-editar" (click)="editarCaso(c)" title="Editar caso">
+          <button
+            class="btn-editar"
+            (click)="editarCaso(c)"
+            [disabled]="c.estatusCaso !== 1"
+            [attr.title]="c.estatusCaso === 1 ? 'Editar caso' : 'Caso cerrado: no se puede editar'">
             <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
             Editar
           </button>
@@ -180,29 +193,301 @@
           </p>
         </div>
 
-        <div class="detalle-item full-width" *ngIf="casoSeleccionado.descripcion">
-          <label><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Descripción:</label>
-          <p class="texto-largo">{{ casoSeleccionado.descripcion }}</p>
+        <!-- Desglose estructurado de los pasos con campos y actual -->
+        <div class="detalle-item full-width pasos-stepper">
+          <label><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Desglose de pasos:</label>
+          <div class="pasos-historial">
+            <!-- Paso 1 -->
+            <div class="paso-card" [class.actual]="esPasoActual(1)">
+              <div class="paso-header">
+                <span class="badge">Paso 1: {{ nombrePasoPorNumero(1) }}</span>
+                <span class="step-chip step-chip-ok">Creado</span>
+                <span *ngIf="esPasoActual(1)" class="step-chip step-chip-actual">Actual</span>
+                <span class="fecha-paso">- {{ (getPaso(1) && getPaso(1).fechaRegistro) ? (getPaso(1).fechaRegistro | date:'dd/MM/yyyy HH:mm') : (casoSeleccionado.fecha | date:'dd/MM/yyyy HH:mm') }}</span>
+              </div>
+              <div class="paso-body">
+                <div *ngIf="casoSeleccionado && casoSeleccionado.descripcion"><strong>Descripción:</strong> {{ casoSeleccionado.descripcion }}</div>
+                <div *ngIf="casoSeleccionado && casoSeleccionado.impacto"><strong>Impacto:</strong> {{ casoSeleccionado.impacto }}</div>
+                <div *ngIf="casoSeleccionado && casoSeleccionado.conducta"><strong>Conducta:</strong> {{ casoSeleccionado.conducta }}</div>
+              </div>
+            </div>
+
+            <!-- Paso 2 -->
+            <div class="paso-card" [class.actual]="esPasoActual(2)">
+              <div class="paso-header">
+                <span class="badge">Paso 2: {{ nombrePasoPorNumero(2) }}</span>
+                <span *ngIf="esPasoActual(2)" class="step-chip step-chip-actual">Actual</span>
+                <span class="step-chip step-chip-ok" *ngIf="!esPasoActual(2) && paso2TieneDatos()">Completado</span>
+                <span class="step-chip step-chip-warn" *ngIf="paso2Estado === 'empty'">Pendiente</span>
+                <span class="step-chip step-chip-err" *ngIf="paso2Estado === 'error'">Error</span>
+                <span class="fecha-paso" *ngIf="(datosPaso2 && datosPaso2.fecha_registro)">- {{ datosPaso2.fecha_registro | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="paso-body">
+                <div *ngIf="(datosPaso2 && datosPaso2.causas_identificadas) || (getPaso(2) && getPaso(2).causas_identificadas); else sinPaso2">
+                  <strong>Causas Identificadas:</strong>
+                  {{ (datosPaso2 && datosPaso2.causas_identificadas) ? datosPaso2.causas_identificadas : getPaso(2).causas_identificadas }}
+                </div>
+                <div *ngIf="(datosPaso2 && datosPaso2.comentarios_adicionales) || (getPaso(2) && getPaso(2).comentarios_adicionales)">
+                  <strong>Comentarios Adicionales:</strong>
+                  {{ (datosPaso2 && datosPaso2.comentarios_adicionales) ? datosPaso2.comentarios_adicionales : getPaso(2).comentarios_adicionales }}
+                </div>
+                <div *ngIf="(datosPaso2 && datosPaso2.Evidencias && datosPaso2.Evidencias.length > 0) || (getPaso(2) && getPaso(2).Evidencias && getPaso(2).Evidencias.length > 0)">
+                  <strong>Evidencias ({{ (datosPaso2 && datosPaso2.Evidencias && datosPaso2.Evidencias.length) ? datosPaso2.Evidencias.length : getPaso(2).Evidencias.length }}):</strong>
+                  <ul>
+                    <li *ngFor="let ev of (datosPaso2 && datosPaso2.Evidencias && datosPaso2.Evidencias.length > 0 ? datosPaso2.Evidencias : getPaso(2).Evidencias)">
+                      📄 {{ ev.nombre_original || ev.nombre_archivo || ev.nombreArchivo || ev.titulo_archivo || 'Archivo' }}
+                      <span *ngIf="ev.tipo_archivo || ev.tipoArchivo">· {{ ev.tipo_archivo || ev.tipoArchivo }}</span>
+                      <span *ngIf="ev.fecha_subida || ev.fechaSubida">· {{ (ev.fecha_subida || ev.fechaSubida) | date:'dd/MM/yyyy HH:mm' }}</span>
+                      <span *ngIf="ev.tamano_bytes != null || ev.tamanoBytes != null">({{ formatFileSize(ev.tamano_bytes ?? ev.tamanoBytes) }})</span>
+                    </li>
+                  </ul>
+                </div>
+                <ng-template #sinPaso2>
+                  <div class="step-muted" *ngIf="paso2Estado === 'loading'">Cargando Paso 2…</div>
+                  <div class="step-muted" *ngIf="paso2Estado === 'empty'">Sin datos del Paso 2</div>
+                  <div class="step-muted" *ngIf="paso2Estado === 'error'">
+                    No se pudo cargar el Paso 2 ({{ paso2Error?.status || '—' }})
+                    <div *ngIf="paso2Error?.details" style="margin-top:6px; white-space:pre-wrap;">
+                      <strong>Detalle:</strong> {{ paso2Error?.details }}
+                    </div>
+                  </div>
+                  <div class="step-muted" *ngIf="paso2Estado === 'idle'">Sin datos del Paso 2</div>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Paso 3 al 6: placeholders claros -->
+            <div class="paso-card" [class.actual]="esPasoActual(3)">
+              <div class="paso-header">
+                <span class="badge">Paso 3: {{ nombrePasoPorNumero(3) }}</span>
+                <span *ngIf="esPasoActual(3)" class="step-chip step-chip-actual">Actual</span>
+                <span class="step-chip step-chip-ok" *ngIf="!esPasoActual(3) && paso3TieneDatos()">Completado</span>
+                <span class="step-chip step-chip-warn" *ngIf="paso3Estado === 'empty'">Pendiente</span>
+                <span class="step-chip step-chip-err" *ngIf="paso3Estado === 'error'">Error</span>
+                <span class="fecha-paso" *ngIf="(datosPaso3 && datosPaso3.fecha_registro)">- {{ datosPaso3.fecha_registro | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="paso-body">
+                <div *ngIf="(datosPaso3 && datosPaso3.metas_claras) || (getPaso(3) && getPaso(3).metas_claras); else sinPaso3">
+                  <strong>Metas claras:</strong>
+                  {{ (datosPaso3 && datosPaso3.metas_claras) ? datosPaso3.metas_claras : getPaso(3).metas_claras }}
+                </div>
+                <div *ngIf="(datosPaso3 && datosPaso3.herramientas_necesarias) || (getPaso(3) && getPaso(3).herramientas_necesarias)">
+                  <strong>Herramientas necesarias:</strong>
+                  {{ (datosPaso3 && datosPaso3.herramientas_necesarias) ? datosPaso3.herramientas_necesarias : getPaso(3).herramientas_necesarias }}
+                </div>
+                <div *ngIf="(datosPaso3 && datosPaso3.capacitacion_sesion) || (getPaso(3) && getPaso(3).capacitacion_sesion)">
+                  <strong>Sesión de capacitación:</strong>
+                  {{ (datosPaso3 && datosPaso3.capacitacion_sesion) ? datosPaso3.capacitacion_sesion : getPaso(3).capacitacion_sesion }}
+                </div>
+                <div *ngIf="(datosPaso3 && datosPaso3.documentacion_capacitacion) || (getPaso(3) && getPaso(3).documentacion_capacitacion)">
+                  <strong>Documentación de capacitación:</strong>
+                  {{ (datosPaso3 && datosPaso3.documentacion_capacitacion) ? datosPaso3.documentacion_capacitacion : getPaso(3).documentacion_capacitacion }}
+                </div>
+                <ng-template #sinPaso3>
+                  <div class="step-muted" *ngIf="paso3Estado === 'loading'">Cargando Paso 3…</div>
+                  <div class="step-muted" *ngIf="paso3Estado === 'empty'">Sin datos del Paso 3</div>
+                  <div class="step-muted" *ngIf="paso3Estado === 'error'">
+                    No se pudo cargar el Paso 3 ({{ paso3Error?.status || '—' }})
+                    <div *ngIf="paso3Error?.details" style="margin-top:6px; white-space:pre-wrap;">
+                      <strong>Detalle:</strong> {{ paso3Error?.details }}
+                    </div>
+                  </div>
+                  <div class="step-muted" *ngIf="paso3Estado === 'idle'">Sin datos del Paso 3</div>
+                </ng-template>
+              </div>
+            </div>
+
+            <div class="paso-card" [class.actual]="esPasoActual(4)">
+              <div class="paso-header">
+                <span class="badge">Paso 4: {{ nombrePasoPorNumero(4) }}</span>
+                <span *ngIf="esPasoActual(4)" class="step-chip step-chip-actual">Actual</span>
+                <span class="step-chip step-chip-ok" *ngIf="!esPasoActual(4) && paso4TieneDatos()">Completado</span>
+                <span class="step-chip step-chip-warn" *ngIf="paso4Estado === 'empty'">Pendiente</span>
+                <span class="step-chip step-chip-err" *ngIf="paso4Estado === 'error'">Error</span>
+                <span class="fecha-paso" *ngIf="(datosPaso4 && datosPaso4.fecha_registro)">- {{ datosPaso4.fecha_registro | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="paso-body">
+                <div *ngIf="(datosPaso4 && datosPaso4.sesion_privada) || (getPaso(4) && getPaso(4).sesion_privada); else sinPaso4">
+                  <strong>Sesión privada:</strong>
+                  {{ (datosPaso4 && datosPaso4.sesion_privada) ? datosPaso4.sesion_privada : getPaso(4).sesion_privada }}
+                </div>
+                <div *ngIf="(datosPaso4 && datosPaso4.comparacion) || (getPaso(4) && getPaso(4).comparacion)">
+                  <strong>Comparación:</strong>
+                  {{ (datosPaso4 && datosPaso4.comparacion) ? datosPaso4.comparacion : getPaso(4).comparacion }}
+                </div>
+                <div *ngIf="(datosPaso4 && datosPaso4.avances) || (getPaso(4) && getPaso(4).avances)">
+                  <strong>Avances y áreas de mejora:</strong>
+                  {{ (datosPaso4 && datosPaso4.avances) ? datosPaso4.avances : getPaso(4).avances }}
+                </div>
+                <div *ngIf="(datosPaso4 && datosPaso4.compromisos) || (getPaso(4) && getPaso(4).compromisos)">
+                  <strong>Nuevos compromisos:</strong>
+                  {{ (datosPaso4 && datosPaso4.compromisos) ? datosPaso4.compromisos : getPaso(4).compromisos }}
+                </div>
+
+                <ng-template #sinPaso4>
+                  <div class="step-muted" *ngIf="paso4Estado === 'loading'">Cargando Paso 4…</div>
+                  <div class="step-muted" *ngIf="paso4Estado === 'empty'">Sin datos del Paso 4</div>
+                  <div class="step-muted" *ngIf="paso4Estado === 'error'">
+                    No se pudo cargar el Paso 4 ({{ paso4Error?.status || '—' }})
+                    <div *ngIf="paso4Error?.details" style="margin-top:6px; white-space:pre-wrap;">
+                      <strong>Detalle:</strong> {{ paso4Error?.details }}
+                    </div>
+                  </div>
+                  <div class="step-muted" *ngIf="paso4Estado === 'idle'">Sin datos del Paso 4</div>
+                </ng-template>
+              </div>
+            </div>
+
+            <div class="paso-card" [class.actual]="esPasoActual(5)">
+              <div class="paso-header">
+                <span class="badge">Paso 5: {{ nombrePasoPorNumero(5) }}</span>
+                <span *ngIf="esPasoActual(5)" class="step-chip step-chip-actual">Actual</span>
+                <span class="step-chip step-chip-ok" *ngIf="!esPasoActual(5) && paso5TieneDatos()">Completado</span>
+                <span class="step-chip step-chip-warn" *ngIf="paso5Estado === 'empty'">Pendiente</span>
+                <span class="step-chip step-chip-err" *ngIf="paso5Estado === 'error'">Error</span>
+                <span class="fecha-paso" *ngIf="(datosPaso5 && datosPaso5.fecha_registro)">- {{ datosPaso5.fecha_registro | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="paso-body">
+                <div *ngIf="(datosPaso5 && datosPaso5.comportamiento) || (getPaso(5) && getPaso(5).comportamiento); else sinPaso5">
+                  <strong>Comportamiento:</strong>
+                  {{ (datosPaso5 && datosPaso5.comportamiento) ? datosPaso5.comportamiento : getPaso(5).comportamiento }}
+                </div>
+                <div *ngIf="(datosPaso5 && datosPaso5.observaciones) || (getPaso(5) && getPaso(5).observaciones)">
+                  <strong>Observaciones:</strong>
+                  {{ (datosPaso5 && datosPaso5.observaciones) ? datosPaso5.observaciones : getPaso(5).observaciones }}
+                </div>
+
+                <ng-template #sinPaso5>
+                  <div class="step-muted" *ngIf="paso5Estado === 'loading'">Cargando Paso 5…</div>
+                  <div class="step-muted" *ngIf="paso5Estado === 'empty'">Sin datos del Paso 5</div>
+                  <div class="step-muted" *ngIf="paso5Estado === 'error'">
+                    No se pudo cargar el Paso 5 ({{ paso5Error?.status || '—' }})
+                    <div *ngIf="paso5Error?.details" style="margin-top:6px; white-space:pre-wrap;">
+                      <strong>Detalle:</strong> {{ paso5Error?.details }}
+                    </div>
+                  </div>
+                  <div class="step-muted" *ngIf="paso5Estado === 'idle'">Sin datos del Paso 5</div>
+                </ng-template>
+              </div>
+            </div>
+
+            <div class="paso-card" [class.actual]="esPasoActual(6)">
+              <div class="paso-header">
+                <span class="badge">Paso 6: {{ nombrePasoPorNumero(6) }}</span>
+                <span class="step-chip step-chip-closed" *ngIf="casoSeleccionado.estatusCaso === 0">Cerrado</span>
+                <ng-container *ngIf="casoSeleccionado.estatusCaso !== 0">
+                  <span *ngIf="esPasoActual(6)" class="step-chip step-chip-actual">Actual</span>
+                  <span class="step-chip step-chip-ok" *ngIf="!esPasoActual(6) && paso6TieneDatos()">Completado</span>
+                  <span class="step-chip step-chip-warn" *ngIf="paso6Estado === 'empty'">Pendiente</span>
+                  <span class="step-chip step-chip-err" *ngIf="paso6Estado === 'error'">Error</span>
+                </ng-container>
+                <span class="fecha-paso" *ngIf="(datosPaso6 && datosPaso6.fecha_registro)">- {{ datosPaso6.fecha_registro | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="paso-body">
+                <div *ngIf="(datosPaso6 && datosPaso6.colaborador) || (getPaso(6) && getPaso(6).colaborador); else sinPaso6">
+                  <strong>Colaborador:</strong>
+                  {{ (datosPaso6 && datosPaso6.colaborador) ? datosPaso6.colaborador : getPaso(6).colaborador }}
+                </div>
+                <div *ngIf="(datosPaso6 && datosPaso6.historial) || (getPaso(6) && getPaso(6).historial)">
+                  <strong>Historial:</strong>
+                  {{ (datosPaso6 && datosPaso6.historial) ? datosPaso6.historial : getPaso(6).historial }}
+                </div>
+                <div *ngIf="(datosPaso6 && datosPaso6.evidencias) || (getPaso(6) && getPaso(6).evidencias)">
+                  <strong>Evidencias:</strong>
+                  {{ (datosPaso6 && datosPaso6.evidencias) ? datosPaso6.evidencias : getPaso(6).evidencias }}
+                </div>
+                <div *ngIf="(datosPaso6 && datosPaso6.version_colaborador) || (getPaso(6) && getPaso(6).version_colaborador)">
+                  <strong>Versión del colaborador:</strong>
+                  {{ (datosPaso6 && datosPaso6.version_colaborador) ? datosPaso6.version_colaborador : getPaso(6).version_colaborador }}
+                </div>
+                <div *ngIf="(datosPaso6 && datosPaso6.firmas) || (getPaso(6) && getPaso(6).firmas)">
+                  <strong>Firmas:</strong>
+                  {{ (datosPaso6 && datosPaso6.firmas) ? datosPaso6.firmas : getPaso(6).firmas }}
+                </div>
+
+                <ng-template #sinPaso6>
+                  <div class="step-muted" *ngIf="paso6Estado === 'loading'">Cargando Paso 6…</div>
+                  <div class="step-muted" *ngIf="paso6Estado === 'empty'">Sin datos del Paso 6</div>
+                  <div class="step-muted" *ngIf="paso6Estado === 'error'">
+                    No se pudo cargar el Paso 6 ({{ paso6Error?.status || '—' }})
+                    <div *ngIf="paso6Error?.details" style="margin-top:6px; white-space:pre-wrap;">
+                      <strong>Detalle:</strong> {{ paso6Error?.details }}
+                    </div>
+                  </div>
+                  <div class="step-muted" *ngIf="paso6Estado === 'idle'">Sin datos del Paso 6</div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="detalle-item full-width" *ngIf="casoSeleccionado.impacto">
-          <label><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>Impacto:</label>
-          <p class="texto-largo">{{ casoSeleccionado.impacto }}</p>
-        </div>
+        
 
-        <div class="detalle-item full-width" *ngIf="casoSeleccionado.conducta">
-          <label><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Conducta:</label>
-          <p class="texto-largo">{{ casoSeleccionado.conducta }}</p>
-        </div>
+
       </div>
     </div>
     
     <div class="modal-footer">
       <button class="btn-secundario" (click)="cerrarModal()">Cerrar</button>
-      <button class="btn-primario" (click)="editarCaso(casoSeleccionado!)">
+      <button
+        class="btn-primario"
+        *ngIf="casoSeleccionado?.estatusCaso === 1; else casoCerradoHint"
+        (click)="editarCaso(casoSeleccionado!)">
         <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
         Editar
       </button>
+      <ng-template #casoCerradoHint>
+        <span class="step-muted">Caso cerrado: edición deshabilitada</span>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar (reemplaza confirm()) -->
+<div class="modal-overlay modal-overlay--top" *ngIf="mostrarModalEditar" (click)="cerrarModalEditar()">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <svg width="20" height="20" fill="white" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:8px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        Editar Caso #{{ casoParaEditar?.id }}
+      </h2>
+      <button class="btn-cerrar" (click)="cerrarModalEditar()">✕</button>
+    </div>
+
+    <div class="modal-body" *ngIf="casoParaEditar">
+      <div class="step-muted" *ngIf="casoParaEditar.estatusCaso !== 1" style="margin-bottom:10px;">
+        Este caso está cerrado. No se puede editar ni avanzar pasos.
+      </div>
+
+      <div class="edit-subtitle">
+        Estás en <strong>Paso {{ casoParaEditar.pasoActual }}: {{ pasoActualNombre }}</strong>
+      </div>
+
+      <div class="edit-actions">
+        <div class="edit-card">
+          <div class="edit-card-title">Editar paso actual</div>
+          <div class="edit-card-desc">Corrige o completa la información del paso en el que está el caso.</div>
+          <button class="btn-secundario btn-full" (click)="irAPasoDesdeModalEditar('actual')" [disabled]="casoParaEditar.estatusCaso !== 1">
+            Editar Paso {{ casoParaEditar.pasoActual }}
+          </button>
+        </div>
+
+        <div class="edit-card" *ngIf="casoParaEditar.pasoActual < 6">
+          <div class="edit-card-title">Avanzar al siguiente paso</div>
+          <div class="edit-card-desc">Continúa el flujo hacia <strong>Paso {{ pasoSiguienteNumero }}: {{ pasoSiguienteNombre }}</strong>.</div>
+          <button class="btn-primario btn-full" (click)="irAPasoDesdeModalEditar('siguiente')" [disabled]="casoParaEditar.estatusCaso !== 1">
+            Ir a Paso {{ pasoSiguienteNumero }}
+          </button>
+        </div>
+      </div>
+
+      <div class="edit-hint" *ngIf="casoParaEditar.pasoActual >= 6">
+        Este caso ya está en el último paso.
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secundario" (click)="cerrarModalEditar()">Cancelar</button>
     </div>
   </div>
 </div>

@@ -23,6 +23,12 @@
   gap: 10px;
 }
 
+.toolbar-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .btn-excel {
   background: #28a745;
   color: white;
@@ -34,6 +40,24 @@
 
   &:hover {
     filter: brightness(0.95);
+  }
+}
+
+.btn-actualizar {
+  background: #0046ad;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    background: darken(#0046ad, 10%);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 }
 
@@ -140,8 +164,8 @@
   }
 
   &.badge-plan_accion {
-    background: #cfe2ff;
-    color: #084298;
+    background: #cff4fc;
+    color: #055160;
   }
 
   &.badge-evaluar_resultados {
@@ -197,6 +221,12 @@
   &:hover {
     filter: brightness(0.95);
   }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+  }
 }
 
 .btn-editar {
@@ -217,6 +247,12 @@
 
   &:hover {
     filter: brightness(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
   }
 }
 
@@ -255,6 +291,10 @@
   animation: fadeIn 0.2s ease;
 }
 
+.modal-overlay--top {
+  z-index: 10001;
+}
+
 .modal-content {
   background: white;
   border-radius: 12px;
@@ -264,6 +304,10 @@
   overflow: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   animation: slideIn 0.3s ease;
+}
+
+.modal-content--small {
+  max-width: 620px;
 }
 
 .modal-header {
@@ -359,6 +403,51 @@
   gap: 10px;
 }
 
+// Modal editar (acciones)
+.edit-subtitle {
+  font-size: 14px;
+  color: #334155;
+  margin-bottom: 16px;
+}
+
+.edit-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.edit-card {
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  padding: 14px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(16, 24, 40, 0.06);
+}
+
+.edit-card-title {
+  font-weight: 800;
+  color: #0a1f44;
+  margin-bottom: 6px;
+}
+
+.edit-card-desc {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+.edit-hint {
+  margin-top: 12px;
+  color: #667085;
+  font-size: 13px;
+}
+
 .btn-secundario {
   background: #6c757d;
   color: white;
@@ -391,10 +480,120 @@
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+// Separador de pasos en el modal
+.separador-paso {
+  margin: 20px 0 15px 0;
+  padding: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  
+  h4 {
+    color: white;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
 }
+
+// Lista de evidencias
+.evidencias-lista {
+  .evidencia-item {
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-left: 3px solid #0046ad;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+}
+
+// Stepper de pasos dentro del modal
+.pasos-stepper {
+  .pasos-historial {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .paso-card {
+    border: 1px solid #e6e9ef;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(16, 24, 40, 0.06);
+    overflow: hidden;
+  }
+
+  .paso-card.actual {
+    border-color: #0d6efd;
+    box-shadow: 0 4px 18px rgba(13, 110, 253, 0.18);
+  }
+
+  .paso-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-bottom: 1px solid #eef2f7;
+  }
+
+  .paso-body {
+    padding: 10px 12px;
+    line-height: 1.5;
+
+    strong {
+      color: #0a1f44;
+    }
+  }
+
+  .fecha-paso {
+    color: #667085;
+    font-size: 12px;
+  }
+
+  .step-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .step-chip-actual {
+    background: #0d6efd;
+    color: #fff;
+  }
+
+  .step-chip-ok {
+    background: #d1e7dd;
+    color: #0f5132;
+  }
+
+  .step-chip-warn {
+    background: #fff3cd;
+    color: #664d03;
+  }
+
+  .step-chip-err {
+    background: #f8d7da;
+    color: #842029;
+  }
+
+  .step-chip-closed {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+
+  .step-muted {
+    color: #667085;
+    font-size: 13px;
+  }
+}
+
 
 @keyframes slideIn {
   from { 

@@ -22,7 +22,8 @@ APP (Angular)
 BACKEND LOCAL (Visual Studio - puerto 7199)
    ├─ /api/Usuarios/jerarquia/{idUsuario} → obtener subordinados
    ├─ /api/Casos/crear → crear nota
-   ├─ /api/Casos/usuario/{idUsuario} → ver mis notas
+  ├─ /api/admin/casos?idUsuario=... → ver mis notas (activos + cerrados)
+  ├─ /api/admin/casos-activos?idUsuario=... → fallback (solo activos)
    └─ /api/Categorias → catálogo de categorías
 ```
 
@@ -194,7 +195,7 @@ src/
 }
 ```
 
-**angular.json** - Usa proxy en `ng serve`:
+**angular.json** - Puedes usar proxy en `ng serve` (equivalente a `npm start`):
 ```json
 "serve": {
   "options": {
@@ -215,8 +216,10 @@ src/
 |--------|----------|-----------|
 | GET | `/api/Usuarios/jerarquia/{idUsuario}` | Obtener subordinados de un jefe |
 | POST | `/api/Casos/crear` | Crear nueva nota disciplinaria |
-| GET | `/api/Casos/usuario/{idUsuario}` | Ver notas de un usuario |
-| GET | `/api/admin/casos-activos` | Ver todas las notas (admin) |
+| GET | `/api/admin/casos?idUsuario={id}` | Ver notas de un usuario (incluye activos + cerrados) |
+| GET | `/api/admin/casos-activos?idUsuario={id}` | Fallback: ver notas activas |
+| GET | `/api/admin/casos?idJefe={id}` | Ver notas del jefe (incluye activos + cerrados) |
+| GET | `/api/admin/casos-activos?idJefe={id}` | Fallback: ver notas activas |
 | GET | `/api/Categorias` | Catálogo de categorías |
 
 ---
@@ -226,9 +229,13 @@ src/
 ### CasoCreate (Lo que envía el frontend)
 ```typescript
 {
-  idUsuarioAfectado: 101,      // A quién va la nota
+  idUsuario: 101,              // A quién va la nota
   idCategoria: 25,             // Tipo de incumplimiento
-  descripcion: "Descripción"   // Detalles del problema
+  descripcion: "Descripción",  // Detalles del problema
+  impacto: "Impacto",
+  conducta: "Conducta observada",
+  idUsuarioJefe: 12345,        // Se llena automáticamente desde el token
+  idPaso: 2                    // Al crear Paso 1, el flujo queda listo para Paso 2
 }
 ```
 
@@ -289,7 +296,7 @@ Confirmación al usuario
 ### 1. Desarrollo local
 ```bash
 # Terminal 1: Inicia Angular
-ng serve
+npm start
 
 # Terminal 2: Inicia backend en Visual Studio
 # (Asegúrate que corre en puerto 7199)
@@ -320,10 +327,8 @@ ng serve
 - ⚠️ Agregar Auth Guard en rutas protegidas
 - ⚠️ Validación de token expirado
 - ⚠️ Traer categorías del backend en lugar de hardcodear
-- ⚠️ Interceptor HTTP para pasar token en headers
-- ⚠️ Manejo de errores más robusto
+- ⚠️ Manejo de errores más robusto (UI/UX)
 - ⚠️ Tests unitarios e integración
-- ⚠️ Logout limpiar localStorage
 
 ---
 
