@@ -29,6 +29,132 @@ http://localhost:4200?acces_token=TU_JWT_TOKEN_AQUI
 
 ---
 
+## 🧪 Correr en local (para pruebas)
+
+### Requisitos
+- Node.js LTS + npm
+- Backend API corriendo en `https://localhost:7199`
+
+### 1) Levantar el API (backend)
+- Desde Visual Studio (Run/Debug) o `dotnet run` (según tu repo de API)
+- Verifica que responde en `https://localhost:7199` y que tus endpoints están bajo `/api/...`
+
+### 2) Levantar el Front (Angular)
+En la raíz de este repo:
+
+```bash
+npm install
+npm start
+```
+
+Notas:
+- `npm start` corre `ng serve` con proxy (ver [proxy.conf.json](proxy.conf.json)).
+- En desarrollo el front usa `apiUrl: "/api"` (ver [src/environments/environment.ts](src/environments/environment.ts)) y el dev-server proxyea a `https://localhost:7199`.
+
+### 3) Entrar a la app
+- `http://localhost:4200`
+
+### 4) Simular SSO (token en URL)
+- `http://localhost:4200?acces_token=TU_JWT_TOKEN_AQUI`
+
+### Si tu API local NO corre en 7199
+Edita el `target` en [proxy.conf.json](proxy.conf.json) y vuelve a correr `npm start`.
+
+---
+
+## 🚀 Levantar en producción (build + IIS)
+
+### 1) Generar build de producción
+Desde la raíz del repo:
+
+```bash
+npm install
+npm run build
+```
+
+Salida esperada:
+- Carpeta: `dist/notas-disciplinarias/browser/`
+
+Nota:
+- El build de producción usa `environment.prod.ts` gracias a `fileReplacements` en [angular.json](angular.json).
+
+### 2) Publicar el Front en IIS
+1. Copia el contenido de `dist/notas-disciplinarias/browser/` a la carpeta física del sitio IIS (por ejemplo `C:\inetpub\wwwroot\notas-disciplinarias`).
+2. Instala el módulo **URL Rewrite** en IIS.
+3. Confirma que se publicó el `web.config` de SPA (viene de [public/web.config](public/web.config) y se copia al build).
+
+Esto es lo que evita 404 al refrescar rutas como `/login`, `/admin`, etc.
+
+### 3) Configurar a qué API apunta en producción
+La URL base del API en producción se define en [src/environments/environment.prod.ts](src/environments/environment.prod.ts).
+
+Por defecto, el repo soporta el escenario:
+- Front en `:80`
+- API en `:84`
+
+Si tu API está en otro puerto/host, ajusta el puerto/URL en ese archivo y vuelve a compilar.
+
+### 4) Validación rápida en navegador
+- Abre el front publicado.
+- F12 → Network → verifica que las llamadas vayan a `http(s)://<host>:84/api/...` (o el host/puerto que corresponda).
+
+
+---
+
+## ✅ Qué se cambió para que funcionara en IIS (Front + API)
+
+### 1) El build de producción NO estaba usando el environment de producción
+Síntoma: ya publicado en IIS, el navegador intentaba pegarle al backend como relativo (por ejemplo `http(s)://<front>:80/api/...`) y eso terminaba en 404 porque el API estaba en otro sitio/puerto.
+
+Cambio aplicado:
+- Se agregó el reemplazo de archivos de entorno en producción en [angular.json](angular.json) para que `environment.ts` se reemplace por `environment.prod.ts` al hacer build.
+
+### 2) En producción el API vive en otro puerto (front :80 vs API :84)
+Síntoma: aun con el build, si `apiUrl` queda como `/api`, el browser busca el API en el mismo origen del front.
+
+Cambio aplicado:
+- Se ajustó [src/environments/environment.prod.ts](src/environments/environment.prod.ts) para construir dinámicamente la URL del API:
+  - Si estás navegando en el mismo puerto del API, usa `/api`.
+  - Si no, apunta al mismo host pero al puerto del API (por defecto `:84`).
+
+### 3) El sitio Angular en IIS daba 404 al recargar rutas (/login, /admin, etc.)
+Síntoma: IIS intentaba buscar un archivo físico `/login` y devolvía 404.
+
+Cambio aplicado:
+- Se agregó [public/web.config](public/web.config) con regla de URL Rewrite para SPAs:
+  - Reescribe rutas a `/index.html`.
+  - Excluye `/api` para no romper el backend.
+  - No reescribe archivos/carpetas reales.
+
+### 4) (Opcional) Limpieza de código que rompía build
+Si se pegó accidentalmente un comando en el código, el build truena o se filtra información. Se revisó [src/app/app.component.ts](src/app/app.component.ts) para dejarlo limpio.
+
+---
+
+## 🧩 Qué se tuvo que ajustar para que el API corriera en IIS
+
+> Nota: el backend (API) no vive en este repo, pero estos fueron los puntos que causan el “en mi PC sí, en IIS no”.
+
+### A) Conexión a SQL Server (Error típico: 500 por login de SQL)
+En IIS el API corre con la identidad del AppPool; si SQL está en Windows Auth, suele fallar.
+
+Recomendación:
+- Usar **SQL Auth** en `ConnectionStrings` (usuario/contraseña) y validar que SQL esté en **Mixed Mode**.
+- Verificar que el usuario tenga permisos en la BD.
+
+### B) JWT HS256: la llave debe tener mínimo 256 bits
+Si el API genera JWT con HS256 y la llave (`Jwt:Key`) es corta, falla con un error tipo `IDX10720`.
+
+Recomendación:
+- Usar una llave de al menos **32 bytes** (por ejemplo, un secreto aleatorio largo) para HS256.
+- No reutilizar el password de SQL como llave JWT.
+
+### C) Logs para ver el error real (evita “500 genérico”)
+En IIS habilita `stdout` en el `web.config` del API (aspNetCore) temporalmente para obtener el stack trace y corregir la causa real.
+
+
+---
+
 ## 📖 Documentación
 
 | Documento | Contenido |

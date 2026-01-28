@@ -4,14 +4,21 @@
 
 ### 1️⃣ **Variables de Entorno**
 
-Crear archivo `environment.prod.ts` con la URL real del backend:
+Este repo ya incluye [src/environments/environment.prod.ts](src/environments/environment.prod.ts).
+
+- Si tu producción usa un API en el **mismo host pero otro puerto** (ej. Front :80 y API :84), el archivo ya soporta ese patrón.
+- Si tu producción usa una **URL fija** (ej. `https://api.midominio.com/api`), puedes simplificar `apiUrl` a un string constante.
+
+Ejemplo URL fija:
 
 ```typescript
 export const environment = {
   production: true,
-  apiUrl: "https://api-produccion.megacable.com.mx/api"  // ⬅️ URL real
+  apiUrl: 'https://api-produccion.megacable.com.mx/api'
 };
 ```
+
+Importante: el build de producción debe usar `environment.prod.ts`. En este repo eso se controla con `fileReplacements` en [angular.json](angular.json).
 
 ### 2️⃣ **Construir para Producción**
 
@@ -21,6 +28,8 @@ ng build --configuration production
 
 # Archivos generados en: dist/notas-disciplinarias/browser/
 ```
+
+Tip: también puedes usar `npm run build` (mapeado a `ng build`).
 
 **Resultado:**
 - JavaScript minificado
@@ -73,12 +82,13 @@ Crear `web.config` en la raíz del sitio:
     <!-- Habilitar compresión -->
     <urlCompression doStaticCompression="true" doDynamicCompression="true" />
     
-    <!-- Rewrite rules para Angular routing -->
+    <!-- Rewrite rules para Angular routing (excluir /api) -->
     <rewrite>
       <rules>
         <rule name="Angular Routes" stopProcessing="true">
           <match url=".*" />
           <conditions logicalGrouping="MatchAll">
+            <add input="{REQUEST_URI}" pattern="^/api(/|$)" negate="true" />
             <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
             <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
           </conditions>
